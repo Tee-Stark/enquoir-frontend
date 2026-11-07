@@ -15,47 +15,55 @@ export type PaymentState = components["schemas"]["PaymentState"];
  */
 export const PAYMENT_STATE_STYLE: Record<
   PaymentState,
-  { label: string; tintClassName: string; dotClassName: string }
+  { label: string; tintClassName: string; dotClassName: string; chartColor: string }
 > = {
   RECEIVED: {
     label: "Received",
     tintClassName: "bg-neutral-state/15 text-neutral-state",
     dotClassName: "bg-neutral-state",
+    chartColor: "var(--neutral-state)",
   },
   PROPOSED: {
     label: "Proposed",
     tintClassName: "bg-primary/15 text-primary",
     dotClassName: "bg-primary",
+    chartColor: "var(--primary)",
   },
   AUTHORIZED: {
     label: "Authorized",
     tintClassName: "bg-primary/15 text-primary",
     dotClassName: "bg-primary",
+    chartColor: "var(--primary)",
   },
   IN_FLIGHT: {
     label: "In flight",
     tintClassName: "bg-warning/15 text-warning",
     dotClassName: "bg-warning",
+    chartColor: "var(--warning)",
   },
   UNKNOWN: {
     label: "Unknown",
     tintClassName: "bg-warning/15 text-warning",
     dotClassName: "bg-warning",
+    chartColor: "var(--warning)",
   },
   APPLIED: {
     label: "Applied",
     tintClassName: "bg-success/15 text-success",
     dotClassName: "bg-success",
+    chartColor: "var(--success)",
   },
   FAILED: {
     label: "Failed",
     tintClassName: "bg-destructive/15 text-destructive",
     dotClassName: "bg-destructive",
+    chartColor: "var(--destructive)",
   },
   BLOCKED: {
     label: "Blocked",
     tintClassName: "bg-accent/15 text-accent",
     dotClassName: "bg-accent",
+    chartColor: "var(--accent)",
   },
 };
 

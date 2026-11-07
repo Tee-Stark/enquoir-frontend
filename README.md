@@ -10,7 +10,7 @@ and Framer Motion.
 
 ## Status
 
-**Phases 1–4 of 7 are complete.**
+**Phases 1–5 of 7 are complete.**
 
 - **Phase 1 (Foundation):** application shell, design system, typed API
   client, shared components, global error handling.
@@ -66,6 +66,27 @@ and Framer Motion.
   outcome → good/bad styling) was pulled out of `AttemptsTable` into
   `src/lib/attempts/outcome.ts` so the replay timeline could share it
   rather than redefine it.
+- **Phase 5 (Analytics):** `/analytics` adds a date-range (with 7/30/90-day
+  presets) and timezone filter row that scopes three charts against
+  `/v1/analytics/timeseries` - payments by state (stacked, one color per
+  state reusing the exact `PaymentStateBadge` palette rather than a second
+  categorical scheme for the same meaning), applied volume by currency
+  (small multiples - one single-series chart per currency, never one chart
+  with currencies overlaid, since amounts in different currencies aren't
+  comparable on a shared axis), and median time to applied. Built on
+  shadcn's `chart.tsx` (Recharts + CSS-variable theming), pulled in via the
+  shadcn CLI like every other UI primitive here rather than hand-rolling
+  the Recharts/Tailwind-token integration. `placeholderData: keepPreviousData`
+  on the time series queries keeps the previous chart on screen during a
+  filter change instead of a skeleton flash. Added `formatMinorUnits` to
+  `src/lib/money.ts` - the one place in this app that derives a displayed
+  amount from raw minor units instead of deferring to a backend-formatted
+  string, because this endpoint has no `Money` object to render, only a
+  number per currency group; documented in place as the one disclosed
+  exception to the project's usual money-formatting rule. The timezone
+  selector is a curated shortlist (the browser's own detected zone plus
+  ~18 common ones), not every IANA zone - a real combobox would be the
+  fuller answer, but this app has no search/combobox component yet.
 
 Along the way, fixed a Cache Components build error on the new dynamic
 `/payments/[key]` route (the first dynamic segment this app has had): the
