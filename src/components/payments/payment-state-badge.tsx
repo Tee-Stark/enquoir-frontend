@@ -7,40 +7,55 @@ export type PaymentState = components["schemas"]["PaymentState"];
  * UI treatment per the product spec. UNKNOWN, FAILED, and BLOCKED are kept
  * visually distinct on purpose - they mean different things (reconciliation
  * needed, execution failed, policy blocked) and must never read as one
- * generic "failure" state.
+ * generic "failure" state. Exported so other payment views (state
+ * progression) can reuse the same mapping instead of redefining it.
+ *
+ * Classes are written out in full, not built from a color variable - the
+ * Tailwind compiler only generates classes it can see as literal strings.
  */
-const STATE_STYLE: Record<PaymentState, { label: string; className: string }> = {
+export const PAYMENT_STATE_STYLE: Record<
+  PaymentState,
+  { label: string; tintClassName: string; dotClassName: string }
+> = {
   RECEIVED: {
     label: "Received",
-    className: "bg-neutral-state/15 text-neutral-state",
+    tintClassName: "bg-neutral-state/15 text-neutral-state",
+    dotClassName: "bg-neutral-state",
   },
   PROPOSED: {
     label: "Proposed",
-    className: "bg-primary/15 text-primary",
+    tintClassName: "bg-primary/15 text-primary",
+    dotClassName: "bg-primary",
   },
   AUTHORIZED: {
     label: "Authorized",
-    className: "bg-primary/15 text-primary",
+    tintClassName: "bg-primary/15 text-primary",
+    dotClassName: "bg-primary",
   },
   IN_FLIGHT: {
     label: "In flight",
-    className: "bg-warning/15 text-warning",
+    tintClassName: "bg-warning/15 text-warning",
+    dotClassName: "bg-warning",
   },
   UNKNOWN: {
     label: "Unknown",
-    className: "bg-warning/15 text-warning",
+    tintClassName: "bg-warning/15 text-warning",
+    dotClassName: "bg-warning",
   },
   APPLIED: {
     label: "Applied",
-    className: "bg-success/15 text-success",
+    tintClassName: "bg-success/15 text-success",
+    dotClassName: "bg-success",
   },
   FAILED: {
     label: "Failed",
-    className: "bg-destructive/15 text-destructive",
+    tintClassName: "bg-destructive/15 text-destructive",
+    dotClassName: "bg-destructive",
   },
   BLOCKED: {
     label: "Blocked",
-    className: "bg-accent/15 text-accent",
+    tintClassName: "bg-accent/15 text-accent",
+    dotClassName: "bg-accent",
   },
 };
 
@@ -51,17 +66,17 @@ export function PaymentStateBadge({
   state: PaymentState;
   className?: string;
 }) {
-  const style = STATE_STYLE[state];
+  const { label, tintClassName } = PAYMENT_STATE_STYLE[state];
   return (
     <span
       data-slot="payment-state-badge"
       className={cn(
         "inline-flex h-5 w-fit shrink-0 items-center justify-center gap-1 rounded-4xl px-2 py-0.5 text-xs font-medium whitespace-nowrap",
-        style.className,
+        tintClassName,
         className
       )}
     >
-      {style.label}
+      {label}
     </span>
   );
 }

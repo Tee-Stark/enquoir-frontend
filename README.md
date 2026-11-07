@@ -10,7 +10,7 @@ and Framer Motion.
 
 ## Status
 
-**Phases 1–2 of 7 are complete.**
+**Phases 1–3 of 7 are complete.**
 
 - **Phase 1 (Foundation):** application shell, design system, typed API
   client, shared components, global error handling.
@@ -28,10 +28,36 @@ and Framer Motion.
   environment sends real email, so exercising them here would mean sending
   one. Worth a manual pass (or switching to the file mailer locally) before
   relying on them in a demo.
+- **Phase 3 (Core dashboard and payments):** Overview (`/dashboard`) and the
+  Payments module (`/payments`, `/payments/[key]`) with filters (date range,
+  state, currency, agent, beneficiary, reference), cursor-based "load more"
+  pagination (never loads the whole history into memory), all 8 payment
+  states visually distinguished, the actual recorded-event sequence as
+  state progression, hash-chain verification shown exactly as the backend
+  reports it (never independently re-derived), and the full event/attempts
+  history. **Scoping note:** the product spec lists metric cards under both
+  Phase 3's "Overview" and Phase 5's "Analytics." Overview now shows every
+  metric from `/v1/analytics/summary` (real data, the backend's own default
+  30-day period) as plain cards; the charts, date-range picker, and
+  timezone selector that section B also describes are Phase 5's job -
+  building them now would duplicate what Phase 5 is specified to add.
+  Empty-state responses (fresh organisation, zero payments) were verified
+  live against the real backend; populated-data rendering (table rows, a
+  real payment's event/attempts history) is contract-verified via generated
+  types but not yet visually confirmed against non-empty data, since that
+  needs a full agent → beneficiary → intent submission flow this pass
+  didn't set up.
 
-Payments, activity, analytics, agents, beneficiaries, and organisation
-member/invitation/audit-log pages are still "not built yet" placeholders —
-see the implementation roadmap for what's next.
+Along the way, fixed a Cache Components build error on the new dynamic
+`/payments/[key]` route (the first dynamic segment this app has had): the
+`(dashboard)` layout now sets `export const instant = false`, since every
+dashboard page is behind a client-side session check and real backend
+data - there's no static shell to prerender there, by design, not by
+oversight.
+
+Activity, agents, beneficiaries, and organisation member/invitation/audit-log
+pages are still "not built yet" placeholders — see the implementation
+roadmap for what's next.
 
 ## Prerequisites
 

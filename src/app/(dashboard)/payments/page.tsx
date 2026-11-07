@@ -1,13 +1,8 @@
-import { ArrowLeftRight } from "lucide-react";
-import { PagePlaceholder } from "@/components/feedback/page-placeholder";
+import type { Metadata } from "next";
+import { PaymentsView } from "./payments-view";
+
+export const metadata: Metadata = { title: "Payments — Enquoir Cloud" };
 
 export default function PaymentsPage() {
-  return (
-    <PagePlaceholder
-      title="Payments"
-      phase={3}
-      description="Every payment intent, filterable, with full state history and hash-chain verification."
-      icon={ArrowLeftRight}
-    />
-  );
+  return <PaymentsView />;
 }

@@ -1,13 +1,8 @@
-import { LayoutDashboard } from "lucide-react";
-import { PagePlaceholder } from "@/components/feedback/page-placeholder";
+import type { Metadata } from "next";
+import { OverviewView } from "./overview-view";
+
+export const metadata: Metadata = { title: "Overview — Enquoir Cloud" };
 
 export default function OverviewPage() {
-  return (
-    <PagePlaceholder
-      title="Overview"
-      phase={3}
-      description="A fast read on your organisation's payment activity: totals, success rate, and recent events."
-      icon={LayoutDashboard}
-    />
-  );
+  return <OverviewView />;
 }
