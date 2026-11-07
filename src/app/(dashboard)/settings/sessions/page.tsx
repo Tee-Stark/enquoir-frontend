@@ -1,13 +1,8 @@
-import { Monitor } from "lucide-react";
-import { PagePlaceholder } from "@/components/feedback/page-placeholder";
+import type { Metadata } from "next";
+import { SessionsView } from "./sessions-view";
+
+export const metadata: Metadata = { title: "Sessions — Enquoir Cloud" };
 
 export default function SessionsSettingsPage() {
-  return (
-    <PagePlaceholder
-      title="Sessions"
-      phase={2}
-      description="Active sessions on your account, with the ability to revoke them."
-      icon={Monitor}
-    />
-  );
+  return <SessionsView />;
 }

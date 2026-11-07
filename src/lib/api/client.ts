@@ -13,14 +13,19 @@ export class ApiError extends Error {
   readonly code: ProblemCode | "unknown";
   readonly detail: string;
   readonly field?: string;
+  /** Seconds to wait before retrying, from the `Retry-After` header on 429s. */
+  readonly retryAfterSeconds?: number;
 
-  constructor(problem: Partial<Problem> & { status: number }) {
+  constructor(
+    problem: Partial<Problem> & { status: number; retryAfterSeconds?: number }
+  ) {
     super(problem.detail ?? problem.title ?? `Request failed (${problem.status})`);
     this.name = "ApiError";
     this.status = problem.status;
     this.code = problem.code ?? "unknown";
     this.detail = problem.detail ?? this.message;
     this.field = problem.field;
+    this.retryAfterSeconds = problem.retryAfterSeconds;
   }
 }
 
@@ -47,23 +52,26 @@ type ApiResult<D> = {
 };
 
 /**
- * Unwraps an openapi-fetch result into its data, or throws a typed ApiError.
+ * Unwraps an openapi-fetch call into its data, or throws a typed ApiError.
  * Centralizing this means every caller gets `error.code` without re-parsing
- * the problem body itself.
+ * the problem body itself. Takes the call's promise directly, so call
+ * sites read as `unwrap(api.GET(...))` instead of needing their own await.
+ *
+ * Success is `response.ok`, not "data is present" - a 204/202 response has
+ * no body by design (logout, verify-email, resend, ...) and openapi-fetch
+ * returns `data: undefined` for those, which is not an error.
  */
-export function unwrap<D>(result: ApiResult<D>): D {
-  const { data, error, response } = result;
-  if (error !== undefined) {
-    throw new ApiError({ ...(error as Partial<Problem>), status: response.status });
-  }
-  if (data === undefined) {
+export async function unwrap<D>(call: Promise<ApiResult<D>>): Promise<D> {
+  const { data, error, response } = await call;
+  if (!response.ok) {
+    const retryAfter = response.headers.get("Retry-After");
     throw new ApiError({
+      ...(error as Partial<Problem> | undefined),
       status: response.status,
-      code: "internal_error",
-      detail: "The server returned no body.",
+      retryAfterSeconds: retryAfter ? Number(retryAfter) : undefined,
     });
   }
-  return data;
+  return data as D;
 }
 
 /** Human-readable fallback copy for a problem code, when a call site wants a default. */
@@ -88,9 +96,20 @@ export const PROBLEM_MESSAGES: Partial<Record<ProblemCode, string>> = {
   unauthenticated: "Please sign in to continue.",
 };
 
+function formatRetryAfter(seconds: number): string {
+  if (seconds < 90) return `${Math.max(1, Math.round(seconds))} seconds`;
+  const minutes = Math.round(seconds / 60);
+  if (minutes < 90) return `${minutes} minutes`;
+  return `${Math.round(minutes / 60)} hours`;
+}
+
 export function problemMessage(error: unknown): string {
   if (isApiError(error)) {
-    return PROBLEM_MESSAGES[error.code as ProblemCode] ?? error.detail;
+    const base = PROBLEM_MESSAGES[error.code as ProblemCode] ?? error.detail;
+    if (error.retryAfterSeconds !== undefined) {
+      return `${base} Try again in ${formatRetryAfter(error.retryAfterSeconds)}.`;
+    }
+    return base;
   }
   return "Something went wrong. Please try again.";
 }

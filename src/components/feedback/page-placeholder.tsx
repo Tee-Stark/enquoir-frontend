@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import { Construction } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/page-header";
 
 /**
  * Honest "not built yet" content for a nav destination whose feature phase
@@ -20,12 +21,7 @@ export function PagePlaceholder({
 }) {
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          {title}
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-      </div>
+      <PageHeader title={title} description={description} />
       <Card className="border-dashed">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">

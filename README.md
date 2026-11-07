@@ -10,11 +10,28 @@ and Framer Motion.
 
 ## Status
 
-**Phase 1 of 7 (Foundation) is complete.** This gives you the application
-shell, design system, typed API client, shared components, and global error
-handling — no feature pages yet. Every nav destination is a real route that
-honestly says "not built yet" rather than showing fake data. See the
-implementation roadmap for what's next.
+**Phases 1–2 of 7 are complete.**
+
+- **Phase 1 (Foundation):** application shell, design system, typed API
+  client, shared components, global error handling.
+- **Phase 2 (Authentication and organisation context):** sign up, log in,
+  log out, email verification (+ resend), password reset/change, session
+  listing and revocation, organisation switching, and real protected routes
+  (`AuthGuard` gates the dashboard behind the live session, redirecting to
+  `/login?next=...` on `401 unauthenticated`). Unverified accounts can
+  explore the dashboard but see a persistent banner restricting the actions
+  that need verification. Signup/session/session-list/logout were
+  smoke-tested against the real backend (exact response shapes confirmed),
+  not just type-checked. The email-token pages (`/verify-email`,
+  `/reset-password`, `/accept-invitation`) are contract-verified but not
+  live-tested end-to-end - the backend's `EMAIL_PROVIDER=resend` in this
+  environment sends real email, so exercising them here would mean sending
+  one. Worth a manual pass (or switching to the file mailer locally) before
+  relying on them in a demo.
+
+Payments, activity, analytics, agents, beneficiaries, and organisation
+member/invitation/audit-log pages are still "not built yet" placeholders —
+see the implementation roadmap for what's next.
 
 ## Prerequisites
 
@@ -86,9 +103,11 @@ HTTP status.
 ### Testing
 
 Unit and component tests (Vitest + React Testing Library) live beside the
-code they test (`*.test.ts(x)`). End-to-end tests (Playwright) aren't set up
-yet — they're introduced from Phase 2 onward, once there are real user flows
-(sign up, log in) to exercise; nothing here stubs that out ahead of time.
+code they test (`*.test.ts(x)`). Phase 2's auth flows were verified by hand
+against the real backend (signup → session → session list → logout, with
+the exact response shapes checked), not just type-checked. End-to-end tests
+(Playwright) still aren't set up - planned for Phase 7 (hardening), covering
+the real user flows that now exist (sign up, log in, verify, reset).
 
 ## Project structure
 

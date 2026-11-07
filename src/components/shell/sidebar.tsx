@@ -3,8 +3,9 @@
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Wordmark, SandboxBadge } from "./wordmark";
+import { Wordmark } from "./wordmark";
 import { SidebarNav } from "./sidebar-nav";
+import { SidebarUserMenu } from "./sidebar-user-menu";
 import { useLocalStorageState } from "@/lib/use-local-storage-state";
 import { cn } from "@/lib/utils";
 
@@ -40,12 +41,8 @@ export function Sidebar() {
       <ScrollArea className="flex-1 px-2 py-3">
         <SidebarNav collapsed={collapsed} />
       </ScrollArea>
-      <div className="border-t border-sidebar-border p-3">
-        {collapsed ? (
-          <span className="mx-auto block size-1.5 rounded-full bg-warning" />
-        ) : (
-          <SandboxBadge />
-        )}
+      <div className="border-t border-sidebar-border p-2">
+        <SidebarUserMenu collapsed={collapsed} />
       </div>
     </aside>
   );

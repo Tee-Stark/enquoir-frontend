@@ -10,8 +10,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Wordmark, SandboxBadge } from "./wordmark";
+import { Wordmark } from "./wordmark";
 import { SidebarNav } from "./sidebar-nav";
+import { SidebarUserMenu } from "./sidebar-user-menu";
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
@@ -34,8 +35,8 @@ export function MobileNav() {
         <div className="flex-1 overflow-y-auto px-2 py-3">
           <SidebarNav onNavigate={() => setOpen(false)} />
         </div>
-        <div className="border-t border-sidebar-border p-3">
-          <SandboxBadge />
+        <div className="border-t border-sidebar-border p-2">
+          <SidebarUserMenu />
         </div>
       </SheetContent>
     </Sheet>

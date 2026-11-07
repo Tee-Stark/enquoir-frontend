@@ -1,13 +1,8 @@
-import { User } from "lucide-react";
-import { PagePlaceholder } from "@/components/feedback/page-placeholder";
+import type { Metadata } from "next";
+import { ProfileView } from "./profile-view";
+
+export const metadata: Metadata = { title: "Profile — Enquoir Cloud" };
 
 export default function ProfileSettingsPage() {
-  return (
-    <PagePlaceholder
-      title="Profile"
-      phase={2}
-      description="Account information and email verification status."
-      icon={User}
-    />
-  );
+  return <ProfileView />;
 }
