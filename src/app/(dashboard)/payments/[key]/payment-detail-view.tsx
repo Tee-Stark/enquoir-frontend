@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, FileSearch } from "lucide-react";
+import { ArrowLeft, FileSearch, History } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -65,11 +65,16 @@ export function PaymentDetailView({ paymentKey }: { paymentKey: string }) {
         >
           <ArrowLeft className="size-3.5" /> Payments
         </Link>
-        <div className="flex flex-wrap items-center gap-3">
-          <h1 className="font-mono text-lg font-semibold tracking-tight text-foreground">
-            {payment.key}
-          </h1>
-          <PaymentStateBadge state={payment.state} />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="font-mono text-lg font-semibold tracking-tight text-foreground">
+              {payment.key}
+            </h1>
+            <PaymentStateBadge state={payment.state} />
+          </div>
+          <Link href={`/payments/${payment.key}/replay`} className={buttonVariants({ variant: "outline", size: "sm" })}>
+            <History className="size-3.5" /> Replay
+          </Link>
         </div>
       </div>
 

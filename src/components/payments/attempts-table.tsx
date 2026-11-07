@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -7,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { isUnhappyOutcome } from "@/lib/attempts/outcome";
 import type { components } from "@/lib/api/schema";
 
 type Attempt = components["schemas"]["Attempt"];
@@ -16,18 +18,14 @@ const KIND_LABEL: Record<Attempt["kind"], string> = {
   rail_call: "Rail call",
 };
 
-/** Outcomes that mean "this attempt did not succeed," for visual emphasis only - never collapsed into one failure bucket for the payment itself. */
-const UNHAPPY_OUTCOMES = new Set<Attempt["outcome"]>([
-  "invalid",
-  "payee_unknown",
-  "error",
-  "rejected",
-  "ambiguous",
-  "duplicate_transfers",
-  "interrupted",
-]);
-
-export function AttemptsTable({ attempts }: { attempts: Attempt[] }) {
+export function AttemptsTable({
+  attempts,
+  showPaymentLink = false,
+}: {
+  attempts: Attempt[];
+  /** Only useful outside a single payment's own detail page, where it would be redundant. */
+  showPaymentLink?: boolean;
+}) {
   return (
     <Table>
       <TableHeader>
@@ -36,6 +34,7 @@ export function AttemptsTable({ attempts }: { attempts: Attempt[] }) {
           <TableHead>Operation</TableHead>
           <TableHead>Outcome</TableHead>
           <TableHead>Agent</TableHead>
+          {showPaymentLink && <TableHead>Payment</TableHead>}
           <TableHead>Duration</TableHead>
           <TableHead>Started</TableHead>
           <TableHead>Detail</TableHead>
@@ -50,7 +49,7 @@ export function AttemptsTable({ attempts }: { attempts: Attempt[] }) {
               <Badge
                 variant="outline"
                 className={
-                  UNHAPPY_OUTCOMES.has(attempt.outcome)
+                  isUnhappyOutcome(attempt.outcome)
                     ? "border-destructive/30 text-destructive"
                     : "border-success/30 text-success"
                 }
@@ -61,6 +60,17 @@ export function AttemptsTable({ attempts }: { attempts: Attempt[] }) {
             <TableCell className="text-muted-foreground">
               {attempt.agent?.name ?? attempt.agent?.id ?? "—"}
             </TableCell>
+            {showPaymentLink && (
+              <TableCell className="font-mono text-xs">
+                {attempt.intent_key ? (
+                  <Link href={`/payments/${attempt.intent_key}`} className="text-primary hover:underline">
+                    {attempt.intent_key}
+                  </Link>
+                ) : (
+                  <span className="text-muted-foreground">—</span>
+                )}
+              </TableCell>
+            )}
             <TableCell className="tabular-nums text-muted-foreground">
               {attempt.duration_ms !== null ? `${attempt.duration_ms} ms` : "—"}
             </TableCell>

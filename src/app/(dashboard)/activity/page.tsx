@@ -1,13 +1,8 @@
-import { Activity as ActivityIcon } from "lucide-react";
-import { PagePlaceholder } from "@/components/feedback/page-placeholder";
+import type { Metadata } from "next";
+import { ActivityView } from "./activity-view";
+
+export const metadata: Metadata = { title: "Activity — Enquoir Cloud" };
 
 export default function ActivityPage() {
-  return (
-    <PagePlaceholder
-      title="Activity"
-      phase={4}
-      description="A unified view of agent submissions and Airwallex calls, with outcomes and timing."
-      icon={ActivityIcon}
-    />
-  );
+  return <ActivityView />;
 }

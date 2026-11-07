@@ -56,3 +56,11 @@ export function usePayment(key: string) {
       unwrap(api.GET("/v1/payments/{key}", { params: { path: { key } } })),
   });
 }
+
+export function useReplay(key: string) {
+  return useQuery({
+    queryKey: ["payment", key, "replay"],
+    queryFn: () =>
+      unwrap(api.GET("/v1/payments/{key}/replay", { params: { path: { key } } })),
+  });
+}

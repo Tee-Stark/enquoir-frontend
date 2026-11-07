@@ -10,7 +10,7 @@ and Framer Motion.
 
 ## Status
 
-**Phases 1–3 of 7 are complete.**
+**Phases 1–4 of 7 are complete.**
 
 - **Phase 1 (Foundation):** application shell, design system, typed API
   client, shared components, global error handling.
@@ -47,17 +47,37 @@ and Framer Motion.
   types but not yet visually confirmed against non-empty data, since that
   needs a full agent → beneficiary → intent submission flow this pass
   didn't set up.
+- **Phase 4 (Execution observability):** the Activity module (`/activity`) -
+  every agent submission and Airwallex call, filterable by kind, operation,
+  outcome, agent, intent key, and date range, with the same cursor-based
+  "load more" pagination as Payments and a link from each attempt back to
+  its payment. And the Payment replay screen (`/payments/[key]/replay`,
+  linked from the payment detail page) - plays a payment's full timeline
+  (submissions, state transitions, rail calls, merged and ordered by the
+  backend's own database clock) with play/pause, step forward/back, a
+  speed selector, and a click-to-jump timeline, plus a detail panel for
+  whichever step is selected (transition states, attempt operation,
+  transfer ID, HTTP status, error code/message, or the event's hash, as
+  applicable to that step's type). The backend's `delta_ms` between steps
+  paces the playback; real gaps are clamped to a 400ms–2500ms watchable
+  range rather than played back literally (a step that took 20 minutes in
+  reality doesn't make the viewer wait 20 minutes) - an explicit frontend
+  presentation choice, not a backend behavior. `isUnhappyOutcome` (attempt
+  outcome → good/bad styling) was pulled out of `AttemptsTable` into
+  `src/lib/attempts/outcome.ts` so the replay timeline could share it
+  rather than redefine it.
 
 Along the way, fixed a Cache Components build error on the new dynamic
 `/payments/[key]` route (the first dynamic segment this app has had): the
 `(dashboard)` layout now sets `export const instant = false`, since every
 dashboard page is behind a client-side session check and real backend
 data - there's no static shell to prerender there, by design, not by
-oversight.
+oversight. The same route pattern (and fix) applies to
+`/payments/[key]/replay`.
 
-Activity, agents, beneficiaries, and organisation member/invitation/audit-log
-pages are still "not built yet" placeholders — see the implementation
-roadmap for what's next.
+Agents, beneficiaries, and organisation member/invitation/audit-log pages
+are still "not built yet" placeholders — see the implementation roadmap
+for what's next.
 
 ## Prerequisites
 
