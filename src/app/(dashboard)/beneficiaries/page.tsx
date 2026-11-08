@@ -1,13 +1,8 @@
-import { Landmark } from "lucide-react";
-import { PagePlaceholder } from "@/components/feedback/page-placeholder";
+import type { Metadata } from "next";
+import { BeneficiariesView } from "./beneficiaries-view";
+
+export const metadata: Metadata = { title: "Beneficiaries — Enquoir Cloud" };
 
 export default function BeneficiariesPage() {
-  return (
-    <PagePlaceholder
-      title="Beneficiaries"
-      phase={6}
-      description="Payees registered on the rail before they can be paid."
-      icon={Landmark}
-    />
-  );
+  return <BeneficiariesView />;
 }

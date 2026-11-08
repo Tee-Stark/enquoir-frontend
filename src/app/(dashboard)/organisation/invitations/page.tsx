@@ -1,13 +1,8 @@
-import { Mail } from "lucide-react";
-import { PagePlaceholder } from "@/components/feedback/page-placeholder";
+import type { Metadata } from "next";
+import { InvitationsView } from "./invitations-view";
+
+export const metadata: Metadata = { title: "Invitations — Enquoir Cloud" };
 
 export default function InvitationsPage() {
-  return (
-    <PagePlaceholder
-      title="Invitations"
-      phase={6}
-      description="Pending invitations by email, with assigned role."
-      icon={Mail}
-    />
-  );
+  return <InvitationsView />;
 }

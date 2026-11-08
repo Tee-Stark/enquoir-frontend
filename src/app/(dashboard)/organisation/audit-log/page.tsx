@@ -1,13 +1,8 @@
-import { ScrollText } from "lucide-react";
-import { PagePlaceholder } from "@/components/feedback/page-placeholder";
+import type { Metadata } from "next";
+import { AuditLogView } from "./audit-log-view";
+
+export const metadata: Metadata = { title: "Audit log — Enquoir Cloud" };
 
 export default function AuditLogPage() {
-  return (
-    <PagePlaceholder
-      title="Audit log"
-      phase={6}
-      description="What happened in this organisation, by whom, and when."
-      icon={ScrollText}
-    />
-  );
+  return <AuditLogView />;
 }

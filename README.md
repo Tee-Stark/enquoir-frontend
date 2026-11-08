@@ -10,7 +10,7 @@ and Framer Motion.
 
 ## Status
 
-**Phases 1–5 of 7 are complete.**
+**Phases 1–6 of 7 are complete.**
 
 - **Phase 1 (Foundation):** application shell, design system, typed API
   client, shared components, global error handling.
@@ -96,9 +96,41 @@ data - there's no static shell to prerender there, by design, not by
 oversight. The same route pattern (and fix) applies to
 `/payments/[key]/replay`.
 
-Agents, beneficiaries, and organisation member/invitation/audit-log pages
-are still "not built yet" placeholders — see the implementation roadmap
-for what's next.
+- **Phase 6 (Infrastructure management):** `/agents` (create an agent and
+  reveal its API key exactly once, rotate a key, revoke an agent),
+  `/beneficiaries` (register a US bank-account payee over ACH, list
+  registered payees), `/organisation/members` (list members, change a
+  role, remove a member or leave), `/organisation/invitations` (invite by
+  email and role, list and revoke pending invitations), and
+  `/organisation/audit-log` (every recorded account action, filterable by
+  action/actor/date range, cursor-paginated "load more" like Payments and
+  Activity). Every action button is gated two ways, both disclosed in the
+  UI and matched against the real backend, not guessed: by the signed-in
+  member's `role` from `useSession()` (viewers see everything read-only;
+  only owners/admins invite, change roles, or remove members; only
+  operators and above create agents or register payees; only an owner
+  edits another owner or admin), and - for create-agent, invite-member,
+  and register-payee specifically - by `user.email_verified`, mirroring
+  the dashboard's existing unverified-account restriction. Client-side
+  gating is a UX nicety only; the backend remains the actual enforcer, and
+  every one of these checks was smoke-tested live against the real
+  backend (a fresh unverified test organisation got back exactly the
+  `403 email_unverified` the gate is built to prevent, and removing the
+  org's only owner correctly came back `409 last_owner`). An API key's
+  secret, and a rotated key's new secret, are rendered in a dedicated
+  "copy it now" dialog the moment the backend issues them and never
+  stored or shown again, matching the backend's own one-time-reveal
+  contract. Role changes and self-removal also invalidate the cached
+  session, since either can sign the acting member out of the
+  organisation at once. **Scoping note:** verifying the full
+  create-agent / invite-member / register-payee success path (not just
+  the unverified-account 403 it's gated against) needs a verified test
+  account, and this environment's `EMAIL_PROVIDER=resend` sends a real
+  email to do that - the same disclosed limitation as Phase 1's
+  email-token pages. The 403/409 error paths above, and every list's
+  empty-state shape, were confirmed live; populated tables (a real agent,
+  a real payee, a second member) are contract-verified via generated
+  types but not yet visually confirmed.
 
 ## Prerequisites
 

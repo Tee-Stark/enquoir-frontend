@@ -1,13 +1,8 @@
-import { Bot } from "lucide-react";
-import { PagePlaceholder } from "@/components/feedback/page-placeholder";
+import type { Metadata } from "next";
+import { AgentsView } from "./agents-view";
+
+export const metadata: Metadata = { title: "Agents — Enquoir Cloud" };
 
 export default function AgentsPage() {
-  return (
-    <PagePlaceholder
-      title="Agents"
-      phase={6}
-      description="The AI agents that can submit payments on this organisation's behalf, and their API keys."
-      icon={Bot}
-    />
-  );
+  return <AgentsView />;
 }
