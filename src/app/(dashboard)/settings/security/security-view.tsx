@@ -32,6 +32,7 @@ export function SecurityView() {
     register,
     handleSubmit,
     reset,
+    setError,
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
@@ -92,7 +93,7 @@ export function SecurityView() {
                 {...register("confirm")}
               />
             </FormField>
-            <FormError error={changePassword.error} />
+            <FormError error={changePassword.error} setError={setError} />
             <Button type="submit" disabled={changePassword.isPending} className="self-start">
               {changePassword.isPending ? "Changing…" : "Change password"}
             </Button>

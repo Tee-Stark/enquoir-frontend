@@ -30,6 +30,7 @@ export function SignUpForm() {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
@@ -72,7 +73,7 @@ export function SignUpForm() {
               {...register("password")}
             />
           </FormField>
-          <FormError error={signUp.error} />
+          <FormError error={signUp.error} setError={setError} />
           <Button type="submit" disabled={signUp.isPending} className="mt-1">
             {signUp.isPending ? "Creating your organisation…" : "Create organisation"}
           </Button>

@@ -28,13 +28,7 @@ import { FormField } from "@/components/form/form-field";
 import { FormError } from "@/components/form/form-error";
 import { useInviteMember } from "@/lib/invitations/queries";
 import type { Role } from "@/lib/members/queries";
-
-const ROLE_LABEL: Record<Role, string> = {
-  owner: "Owner",
-  admin: "Admin",
-  operator: "Operator",
-  viewer: "Viewer",
-};
+import { ROLE_LABEL } from "@/lib/members/roles";
 
 const schema = z.object({
   email: z.string().email("Enter a valid email address."),
@@ -58,6 +52,7 @@ export function InviteMemberDialog({
     handleSubmit,
     reset,
     control,
+    setError,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -124,7 +119,7 @@ export function InviteMemberDialog({
               )}
             />
           </FormField>
-          <FormError error={inviteMember.error} />
+          <FormError error={inviteMember.error} setError={setError} />
           <DialogFooter showCloseButton>
             <Button type="submit" disabled={inviteMember.isPending}>
               {inviteMember.isPending ? "Sending…" : "Send invitation"}

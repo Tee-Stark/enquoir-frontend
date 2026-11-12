@@ -66,6 +66,9 @@ export const EMPTY_FILTERS: FilterFormState = {
 
 export function toApiFilters(form: FilterFormState): AttemptFilters {
   return {
+    // Both inputs are datetime-local - a bare date string would parse as
+    // UTC midnight, but a date+time string parses in the viewer's own local
+    // time, which is what the picker actually shows them.
     from: form.from ? new Date(form.from).toISOString() : undefined,
     to: form.to ? new Date(form.to).toISOString() : undefined,
     kind: form.kind === "all" ? undefined : (form.kind as AttemptKind),
@@ -97,8 +100,8 @@ export function AttemptsFilters({
         </Label>
         <Input
           id="from"
-          type="date"
-          className="h-8 w-36"
+          type="datetime-local"
+          className="h-8 w-52"
           value={value.from}
           onChange={(e) => set("from", e.target.value)}
         />
@@ -109,8 +112,8 @@ export function AttemptsFilters({
         </Label>
         <Input
           id="to"
-          type="date"
-          className="h-8 w-36"
+          type="datetime-local"
+          className="h-8 w-52"
           value={value.to}
           onChange={(e) => set("to", e.target.value)}
         />

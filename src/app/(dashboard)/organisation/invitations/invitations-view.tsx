@@ -19,17 +19,9 @@ import { PageHeader } from "@/components/page-header";
 import { InviteMemberDialog } from "@/components/invitations/invite-member-dialog";
 import { problemMessage } from "@/lib/api/client";
 import { useSession } from "@/lib/auth/session";
-import { useMembers, type Role } from "@/lib/members/queries";
+import { useMembers } from "@/lib/members/queries";
+import { ROLE_LABEL, canManageMembers, selectableRoles } from "@/lib/members/roles";
 import { useInvitations, useRevokeInvitation } from "@/lib/invitations/queries";
-
-const ROLES: Role[] = ["owner", "admin", "operator", "viewer"];
-const ROLE_RANK: Record<Role, number> = { owner: 4, admin: 3, operator: 2, viewer: 1 };
-const ROLE_LABEL: Record<Role, string> = {
-  owner: "Owner",
-  admin: "Admin",
-  operator: "Operator",
-  viewer: "Viewer",
-};
 
 export function InvitationsView() {
   const { data, isPending, isError, error, refetch } = useInvitations();
@@ -41,12 +33,8 @@ export function InvitationsView() {
   const viewerRole = session.data?.role;
   // Owners and admins invite and revoke, with a verified email, and never
   // above their own role.
-  const canInvite =
-    (viewerRole === "owner" || viewerRole === "admin") &&
-    session.data?.user.email_verified === true;
-  const invitableRoles = viewerRole
-    ? ROLES.filter((r) => ROLE_RANK[r] <= ROLE_RANK[viewerRole])
-    : [];
+  const canInvite = canManageMembers(viewerRole) && session.data?.user.email_verified === true;
+  const invitableRoles = selectableRoles(viewerRole);
 
   const emailById = new Map(members.data?.data.map((m) => [m.user.id, m.user.email]));
 
@@ -57,7 +45,7 @@ export function InvitationsView() {
           title="Invitations"
           description="Pending invitations by email, with assigned role."
         />
-        {(viewerRole === "owner" || viewerRole === "admin") && (
+        {canManageMembers(viewerRole) && (
           <InviteMemberDialog disabled={!canInvite} invitableRoles={invitableRoles} />
         )}
       </div>
@@ -66,7 +54,11 @@ export function InvitationsView() {
       {isError && <ErrorState error={error} onRetry={refetch} />}
 
       {data && invitations.length === 0 && (
-        <EmptyState icon={Mail} title="No pending invitations" />
+        <EmptyState
+          icon={Mail}
+          title="No pending invitations"
+          description="Invited teammates will appear here until they accept."
+        />
       )}
 
       {data && invitations.length > 0 && (
@@ -96,7 +88,7 @@ export function InvitationsView() {
                       {new Date(invitation.expires_at).toLocaleDateString()}
                     </TableCell>
                     <TableCell className="text-right">
-                      {(viewerRole === "owner" || viewerRole === "admin") && (
+                      {canManageMembers(viewerRole) && (
                         <Button
                           variant="destructive"
                           size="sm"

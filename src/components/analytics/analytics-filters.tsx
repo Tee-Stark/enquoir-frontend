@@ -55,14 +55,18 @@ export const DEFAULT_FILTERS: AnalyticsFilterState = { from: "", to: "", tz: "UT
 
 export function toApiFilters(form: AnalyticsFilterState): AnalyticsPeriodFilters {
   return {
-    from: form.from ? new Date(`${form.from}T00:00:00`).toISOString() : undefined,
-    to: form.to ? new Date(`${form.to}T00:00:00`).toISOString() : undefined,
+    // Both inputs are datetime-local, which parses in the viewer's own
+    // local time - no need to force a midnight boundary ourselves anymore.
+    from: form.from ? new Date(form.from).toISOString() : undefined,
+    to: form.to ? new Date(form.to).toISOString() : undefined,
     tz: form.tz || undefined,
   };
 }
 
-function toDateInput(date: Date): string {
-  return date.toISOString().slice(0, 10);
+/** Local wall-clock "YYYY-MM-DDTHH:mm", matching what a datetime-local input shows and expects - toISOString() would shift to UTC and show the wrong time to the viewer. */
+export function toDateTimeInput(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
 export function AnalyticsFilters({
@@ -84,7 +88,7 @@ export function AnalyticsFilters({
     const to = new Date();
     const from = new Date();
     from.setDate(from.getDate() - days);
-    onChange({ ...value, from: toDateInput(from), to: toDateInput(to) });
+    onChange({ ...value, from: toDateTimeInput(from), to: toDateTimeInput(to) });
   };
 
   const isCustom = value.from === "" && value.to === "";
@@ -119,8 +123,8 @@ export function AnalyticsFilters({
         </Label>
         <Input
           id="from"
-          type="date"
-          className="h-8 w-36"
+          type="datetime-local"
+          className="h-8 w-52"
           value={value.from}
           onChange={(e) => set("from", e.target.value)}
         />
@@ -131,8 +135,8 @@ export function AnalyticsFilters({
         </Label>
         <Input
           id="to"
-          type="date"
-          className="h-8 w-36"
+          type="datetime-local"
+          className="h-8 w-52"
           value={value.to}
           onChange={(e) => set("to", e.target.value)}
         />

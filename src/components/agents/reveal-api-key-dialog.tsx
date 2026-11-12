@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -28,9 +29,16 @@ export function RevealApiKeyDialog({
 
   const copy = async () => {
     if (!issued) return;
-    await navigator.clipboard.writeText(issued.api_key.secret);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(issued.api_key.secret);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard access can fail (permission denied, an unfocused
+      // document, ...) - this secret is never shown again, so a silent
+      // failure here would be worse than a noisy one.
+      toast.error("Couldn't copy to the clipboard. Select and copy the key manually.");
+    }
   };
 
   return (

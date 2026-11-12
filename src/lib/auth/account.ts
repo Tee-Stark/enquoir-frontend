@@ -13,6 +13,9 @@ export function useSignUp() {
       organisation_name: string;
     }) => unwrap(api.POST("/v1/auth/signup", { body })),
     onSuccess: (session) => {
+      // A previous account's org-scoped data (agents, beneficiaries, ...)
+      // must not survive into this new session - see useLogOut/useSwitchOrganisation.
+      queryClient.clear();
       queryClient.setQueryData(SESSION_QUERY_KEY, session);
     },
   });
@@ -24,6 +27,7 @@ export function useLogIn() {
     mutationFn: (body: { email: string; password: string }) =>
       unwrap(api.POST("/v1/auth/login", { body })),
     onSuccess: (session) => {
+      queryClient.clear();
       queryClient.setQueryData(SESSION_QUERY_KEY, session);
     },
   });

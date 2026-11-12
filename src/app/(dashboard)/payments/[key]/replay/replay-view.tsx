@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo } from "react";
 import { ArrowLeft, FileSearch, History } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -54,7 +55,11 @@ export function ReplayView({ paymentKey }: { paymentKey: string }) {
  */
 function ReplayPlayer({ paymentKey, replay }: { paymentKey: string; replay: Replay }) {
   const steps = replay.steps;
-  const deltaMsList = steps.map((s) => s.delta_ms);
+  // Stable across re-renders that don't change the step list itself (e.g. a
+  // background refetch of this same replay) - the playback hook's effect
+  // depends on this array by identity, and a fresh array every render would
+  // restart the current step's countdown for no reason.
+  const deltaMsList = useMemo(() => steps.map((s) => s.delta_ms), [steps]);
   const playback = useReplayPlayback(deltaMsList);
   const currentStep = steps[playback.currentIndex];
 

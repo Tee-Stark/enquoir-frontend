@@ -26,21 +26,8 @@ import { EmptyState } from "@/components/feedback/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { problemMessage } from "@/lib/api/client";
 import { useSession } from "@/lib/auth/session";
-import {
-  useChangeMemberRole,
-  useMembers,
-  useRemoveMember,
-  type Role,
-} from "@/lib/members/queries";
-
-const ROLES: Role[] = ["owner", "admin", "operator", "viewer"];
-const ROLE_RANK: Record<Role, number> = { owner: 4, admin: 3, operator: 2, viewer: 1 };
-const ROLE_LABEL: Record<Role, string> = {
-  owner: "Owner",
-  admin: "Admin",
-  operator: "Operator",
-  viewer: "Viewer",
-};
+import { useChangeMemberRole, useMembers, useRemoveMember, type Role } from "@/lib/members/queries";
+import { ROLE_LABEL, canEditMemberWithRole, selectableRoles } from "@/lib/members/roles";
 
 export function MembersView() {
   const { data, isPending, isError, error, refetch } = useMembers();
@@ -51,17 +38,9 @@ export function MembersView() {
   const members = data?.data ?? [];
   const viewerId = session.data?.user.id;
   const viewerRole = session.data?.role;
-  // Only owners and admins invite, remove, or change roles for others - and
-  // never above their own role; an admin can't touch another admin or owner.
-  const canManageOthers = viewerRole === "owner" || viewerRole === "admin";
 
-  const canEditMember = (memberRole: Role) =>
-    canManageOthers &&
-    (viewerRole === "owner" || ROLE_RANK[memberRole] < ROLE_RANK["admin"]);
-
-  const selectableRoles = viewerRole
-    ? ROLES.filter((r) => ROLE_RANK[r] <= ROLE_RANK[viewerRole])
-    : [];
+  const canEditMember = (memberRole: Role) => canEditMemberWithRole(viewerRole, memberRole);
+  const assignableRoles = selectableRoles(viewerRole);
 
   return (
     <div className="flex flex-col gap-6">
@@ -118,7 +97,7 @@ export function MembersView() {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              {selectableRoles.map((r) => (
+                              {assignableRoles.map((r) => (
                                 <SelectItem key={r} value={r}>
                                   {ROLE_LABEL[r]}
                                 </SelectItem>

@@ -35,6 +35,7 @@ export function AcceptInvitationForm() {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: { password: "" } });
 
@@ -117,7 +118,7 @@ export function AcceptInvitationForm() {
               {...register("password")}
             />
           </FormField>
-          <FormError error={acceptInvitation.error} />
+          <FormError error={acceptInvitation.error} setError={setError} />
           <Button type="submit" disabled={acceptInvitation.isPending}>
             {acceptInvitation.isPending ? "Joining…" : "Accept invitation"}
           </Button>

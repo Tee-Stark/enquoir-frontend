@@ -38,6 +38,7 @@ export function ResetPasswordForm() {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
@@ -117,7 +118,7 @@ export function ResetPasswordForm() {
               {...register("confirm")}
             />
           </FormField>
-          <FormError error={resetPassword.error} />
+          <FormError error={resetPassword.error} setError={setError} />
           <Button type="submit" disabled={resetPassword.isPending}>
             {resetPassword.isPending ? "Setting password…" : "Set new password"}
           </Button>

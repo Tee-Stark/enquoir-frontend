@@ -55,6 +55,7 @@ export function RegisterBeneficiaryDialog({ disabled }: { disabled?: boolean }) 
     handleSubmit,
     reset,
     control,
+    setError,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -162,7 +163,7 @@ export function RegisterBeneficiaryDialog({ disabled }: { disabled?: boolean }) 
               <Input id="ben-postcode" className="w-24" {...register("postcode")} />
             </FormField>
           </div>
-          <FormError error={registerBeneficiary.error} />
+          <FormError error={registerBeneficiary.error} setError={setError} />
           <DialogFooter showCloseButton>
             <Button type="submit" disabled={registerBeneficiary.isPending}>
               {registerBeneficiary.isPending ? "Registering…" : "Register"}

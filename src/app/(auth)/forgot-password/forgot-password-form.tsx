@@ -27,6 +27,7 @@ export function ForgotPasswordForm() {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
@@ -70,7 +71,7 @@ export function ForgotPasswordForm() {
           <FormField label="Email" htmlFor="email" error={errors.email?.message}>
             <Input id="email" type="email" autoComplete="email" {...register("email")} />
           </FormField>
-          <FormError error={forgotPassword.error} />
+          <FormError error={forgotPassword.error} setError={setError} />
           <Button type="submit" disabled={forgotPassword.isPending}>
             {forgotPassword.isPending ? "Sending…" : "Send reset link"}
           </Button>

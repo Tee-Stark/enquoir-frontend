@@ -19,8 +19,19 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-function isSafeNextPath(path: string | null): path is string {
-  return !!path && path.startsWith("/") && !path.startsWith("//");
+/**
+ * Resolves against the app's own origin rather than a string-prefix check -
+ * a naive startsWith("/") && !startsWith("//") still accepts a backslash
+ * payload like "/\\evil.com", which the WHATWG URL parser (and so
+ * Next.js's router) treats as "//evil.com" for a special scheme.
+ */
+export function isSafeNextPath(path: string | null): path is string {
+  if (!path) return false;
+  try {
+    return new URL(path, window.location.origin).origin === window.location.origin;
+  } catch {
+    return false;
+  }
 }
 
 export function LogInForm() {
@@ -30,6 +41,7 @@ export function LogInForm() {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
@@ -69,7 +81,7 @@ export function LogInForm() {
               Forgot password?
             </Link>
           </div>
-          <FormError error={logIn.error} />
+          <FormError error={logIn.error} setError={setError} />
           <Button type="submit" disabled={logIn.isPending}>
             {logIn.isPending ? "Logging in…" : "Log in"}
           </Button>
