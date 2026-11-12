@@ -13,19 +13,24 @@ export function MetricCard({
   value,
   hint,
   tone,
+  size = "default",
 }: {
   label: string;
   value: React.ReactNode;
   hint?: string;
   tone?: keyof typeof TONE_CLASS;
+  size?: "default" | "lg";
 }) {
   return (
     <Card>
-      <CardContent className="flex flex-col gap-1 p-4">
-        <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <CardContent className="flex flex-col gap-1.5 p-4">
+        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          {label}
+        </p>
         <p
           className={cn(
-            "text-2xl font-semibold tabular-nums text-foreground",
+            "font-semibold tabular-nums tracking-tight text-foreground",
+            size === "lg" ? "text-3xl" : "text-2xl",
             tone && TONE_CLASS[tone]
           )}
         >

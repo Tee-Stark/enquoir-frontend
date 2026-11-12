@@ -19,11 +19,16 @@ export function Sidebar() {
     <aside
       className={cn(
         "hidden shrink-0 flex-col border-r border-sidebar-border bg-sidebar transition-[width] duration-150 md:flex",
-        collapsed ? "w-16" : "w-60"
+        collapsed ? "w-16" : "w-56"
       )}
     >
-      <div className="flex h-14 items-center justify-between gap-2 border-b border-sidebar-border px-3">
-        <Wordmark collapsed={collapsed} />
+      <div
+        className={cn(
+          "flex h-14 items-center border-b border-sidebar-border px-3",
+          collapsed ? "justify-center" : "justify-between gap-2"
+        )}
+      >
+        {!collapsed && <Wordmark collapsed={collapsed} />}
         <Button
           variant="ghost"
           size="icon-sm"

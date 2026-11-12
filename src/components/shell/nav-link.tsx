@@ -25,14 +25,18 @@ export function NavLink({
       aria-current={active ? "page" : undefined}
       title={collapsed ? item.label : undefined}
       className={cn(
-        "flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium transition-colors",
+        "relative flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13px] font-medium transition-colors",
+        "before:absolute before:inset-y-1.5 before:left-0 before:w-0.5 before:rounded-full before:bg-sidebar-primary before:transition-opacity",
         collapsed && "justify-center",
         active
-          ? "bg-sidebar-accent text-sidebar-accent-foreground"
-          : "text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
+          ? "bg-sidebar-primary/12 text-sidebar-foreground before:opacity-100"
+          : "text-sidebar-foreground/70 before:opacity-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
       )}
     >
-      <Icon className="size-4 shrink-0" aria-hidden="true" />
+      <Icon
+        className={cn("size-4 shrink-0", active && "text-sidebar-primary")}
+        aria-hidden="true"
+      />
       {!collapsed && <span className="truncate">{item.label}</span>}
     </Link>
   );

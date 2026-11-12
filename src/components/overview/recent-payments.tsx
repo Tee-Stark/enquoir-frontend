@@ -10,7 +10,7 @@ export function RecentPayments({ payments }: { payments: Payment[] }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Recent activity</CardTitle>
+        <CardTitle className="text-base">Recent payments</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
         {payments.length === 0 ? (

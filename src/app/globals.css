@@ -53,49 +53,52 @@
 }
 
 :root {
-  /* Enquoir Cloud — Violet x Crimson, dark-first financial console */
-  --background: #211b2b;
-  --foreground: #f4f0f7;
-  --card: #30283c;
-  --card-foreground: #f4f0f7;
-  --popover: #30283c;
-  --popover-foreground: #f4f0f7;
-  --primary: #7041b8;
-  --primary-foreground: #f4f0f7;
-  --secondary: #30283c;
-  --secondary-foreground: #f4f0f7;
-  --muted: #3a3148;
-  --muted-foreground: #a89dbe;
+  /* Enquoir Cloud — electric violet on a violet-black foundation,
+     dark-first financial console. Crimson (--accent) is reserved for one
+     semantic meaning only: the BLOCKED payment state (see
+     payment-state-badge.tsx) - it never appears decoratively. */
+  --background: #130f1c;
+  --foreground: #f3eff9;
+  --card: #1e1830;
+  --card-foreground: #f3eff9;
+  --popover: #221b38;
+  --popover-foreground: #f3eff9;
+  --primary: #8457e8;
+  --primary-foreground: #ffffff;
+  --secondary: #241c3a;
+  --secondary-foreground: #f3eff9;
+  --muted: #2a2140;
+  --muted-foreground: #b4a8cf;
   --accent: #b72f53;
-  --accent-foreground: #f4f0f7;
+  --accent-foreground: #f3eff9;
   --destructive: #e5484d;
-  --destructive-foreground: #f4f0f7;
+  --destructive-foreground: #f3eff9;
   --border: #ffffff1f;
   --input: #ffffff29;
-  --ring: #7041b8;
+  --ring: #8457e8;
   --radius: 0.5rem;
 
-  /* Status semantics, distinct from --accent (reserved for highlights/critical actions) */
+  /* Status semantics, distinct from --accent (reserved for BLOCKED only) */
   --success: #3fb97e;
   --success-foreground: #0b1f16;
   --warning: #e0a440;
   --warning-foreground: #241a05;
   --neutral-state: #6b6478;
 
-  --chart-1: #7041b8;
-  --chart-2: #b72f53;
-  --chart-3: #3fb97e;
-  --chart-4: #e0a440;
-  --chart-5: #6b6478;
+  --chart-1: #8457e8;
+  --chart-2: #3fb97e;
+  --chart-3: #e0a440;
+  --chart-4: #6b6478;
+  --chart-5: #b4a8cf;
 
-  --sidebar: #1b1624;
-  --sidebar-foreground: #f4f0f7;
-  --sidebar-primary: #7041b8;
-  --sidebar-primary-foreground: #f4f0f7;
-  --sidebar-accent: #30283c;
-  --sidebar-accent-foreground: #f4f0f7;
+  --sidebar: #0f0c17;
+  --sidebar-foreground: #f3eff9;
+  --sidebar-primary: #8457e8;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #221b36;
+  --sidebar-accent-foreground: #f3eff9;
   --sidebar-border: #ffffff14;
-  --sidebar-ring: #7041b8;
+  --sidebar-ring: #8457e8;
 }
 
 @layer base {
