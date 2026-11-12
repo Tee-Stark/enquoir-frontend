@@ -10,7 +10,7 @@ and Framer Motion.
 
 ## Status
 
-**Phases 1–6 of 7 are complete.**
+**Phases 1–6 of 7 are complete; Phase 7 (hardening) is in progress.**
 
 - **Phase 1 (Foundation):** application shell, design system, typed API
   client, shared components, global error handling.
@@ -131,6 +131,20 @@ oversight. The same route pattern (and fix) applies to
   empty-state shape, were confirmed live; populated tables (a real agent,
   a real payee, a second member) are contract-verified via generated
   types but not yet visually confirmed.
+- **Phase 7 (Hardening), in progress:** Playwright e2e tests against the
+  real dashboard UI and a real backend - see `e2e/README.md`. So far:
+  the unauthenticated-redirect check, and the full sign up → unverified
+  banner → email verification → log out → forgot password → reset → log
+  in journey, reading tokens back out of the backend's `MAIL_FILE` the
+  same way its own `scripts/e2e.sh` does. This first run caught two real
+  bugs (not environment artifacts): `SidebarUserMenu` crashed the whole
+  dashboard on open (a `DropdownMenuLabel` used outside the `Menu.Group`
+  Base UI requires it to be in), and logging out invalidated the session
+  on the backend but left the UI on the stale dashboard instead of
+  redirecting - both fixed, see `e2e/README.md` for detail. Not yet
+  covered: invitation accept, and visually confirming the populated-data
+  views Phases 1, 3, and 6 above disclose as contract-verified but not
+  yet seen with real data.
 
 ## Prerequisites
 
@@ -197,6 +211,7 @@ HTTP status.
 | `pnpm typecheck`      | `tsc --noEmit`                                |
 | `pnpm test`           | Run the Vitest suite once                     |
 | `pnpm test:watch`     | Run Vitest in watch mode                      |
+| `pnpm test:e2e`       | Run the Playwright e2e suite (see `e2e/README.md`) |
 | `pnpm sync:api`       | Re-vendor the OpenAPI spec and regenerate types |
 
 ### Testing
@@ -205,8 +220,8 @@ Unit and component tests (Vitest + React Testing Library) live beside the
 code they test (`*.test.ts(x)`). Phase 2's auth flows were verified by hand
 against the real backend (signup → session → session list → logout, with
 the exact response shapes checked), not just type-checked. End-to-end tests
-(Playwright) still aren't set up - planned for Phase 7 (hardening), covering
-the real user flows that now exist (sign up, log in, verify, reset).
+(Playwright) now live in `e2e/` - see `e2e/README.md` for what they cover
+and how to run them.
 
 ## Project structure
 

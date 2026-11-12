@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Check, LogOut, Settings } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -17,6 +19,7 @@ import { problemMessage } from "@/lib/api/client";
 import { cn } from "@/lib/utils";
 
 export function SidebarUserMenu({ collapsed }: { collapsed?: boolean }) {
+  const router = useRouter();
   const { data } = useSession();
   const switchOrganisation = useSwitchOrganisation();
   const logOut = useLogOut();
@@ -50,35 +53,51 @@ export function SidebarUserMenu({ collapsed }: { collapsed?: boolean }) {
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" side="top" className="w-56">
-        <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
+        {/* Not a group label - Base UI's GroupLabel requires a Menu.Group
+            ancestor, but this line labels nothing below it; a plain
+            styled line, not the menu-label primitive. */}
+        <p className="truncate px-1.5 py-1 text-xs font-medium text-muted-foreground">
+          {user.email}
+        </p>
         {otherOrganisations.length > 0 && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuLabel>Switch organisation</DropdownMenuLabel>
-            <DropdownMenuItem disabled className="opacity-100">
-              <Check className="size-3.5" />
-              {organisation.name}
-            </DropdownMenuItem>
-            {otherOrganisations.map((org) => (
-              <DropdownMenuItem
-                key={org.id}
-                disabled={switchOrganisation.isPending}
-                onClick={() =>
-                  switchOrganisation.mutate(org.id, {
-                    onError: (error) => toast.error(problemMessage(error)),
-                  })
-                }
-              >
-                {org.name}
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>Switch organisation</DropdownMenuLabel>
+              <DropdownMenuItem disabled className="opacity-100">
+                <Check className="size-3.5" />
+                {organisation.name}
               </DropdownMenuItem>
-            ))}
+              {otherOrganisations.map((org) => (
+                <DropdownMenuItem
+                  key={org.id}
+                  disabled={switchOrganisation.isPending}
+                  onClick={() =>
+                    switchOrganisation.mutate(org.id, {
+                      onError: (error) => toast.error(problemMessage(error)),
+                    })
+                  }
+                >
+                  {org.name}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuGroup>
           </>
         )}
         <DropdownMenuSeparator />
         <DropdownMenuItem render={<Link href="/settings/profile" />}>
           <Settings /> Settings
         </DropdownMenuItem>
-        <DropdownMenuItem variant="destructive" onClick={() => logOut.mutate()}>
+        <DropdownMenuItem
+          variant="destructive"
+          onClick={() =>
+            // Don't rely solely on AuthGuard's passive unauthenticated
+            // redirect here - it reacts to the session query, but a
+            // user-initiated logout deserves a deterministic navigation,
+            // not a wait for some other component's effect to notice.
+            logOut.mutate(undefined, { onSuccess: () => router.push("/login") })
+          }
+        >
           <LogOut /> Log out
         </DropdownMenuItem>
       </DropdownMenuContent>

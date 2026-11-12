@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
     "sync:api": "scripts/sync-openapi.sh"
   },
   "dependencies": {
@@ -36,6 +37,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.0",
     "@tailwindcss/turbopack": "^4",
     "@tanstack/react-query-devtools": "^5.106.1",
     "@testing-library/jest-dom": "^7.0.1",
