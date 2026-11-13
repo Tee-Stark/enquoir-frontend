@@ -10,6 +10,7 @@ import {
   useMandateConsentView,
   useApproveMandateConsent,
   useRejectMandateConsent,
+  handleConsentError,
   type ConsentOutcome,
 } from "@/lib/commerce/consent";
 
@@ -88,12 +89,19 @@ export function MandateConsentPanel() {
                 primary={{
                   label: approve.isPending ? "Approving…" : "Approve",
                   pending: approve.isPending,
-                  onClick: () => token && approve.mutate({ token, terms_hash: terms.terms_hash }),
+                  onClick: () =>
+                    token &&
+                    approve.mutate(
+                      { token, terms_hash: terms.terms_hash },
+                      { onError: (err) => handleConsentError(err, view.refetch) },
+                    ),
                 }}
                 secondary={{
                   label: reject.isPending ? "Declining…" : "Decline",
                   pending: reject.isPending,
-                  onClick: () => token && reject.mutate(token),
+                  onClick: () =>
+                    token &&
+                    reject.mutate(token, { onError: (err) => handleConsentError(err, view.refetch) }),
                 }}
               />
             </CardContent>

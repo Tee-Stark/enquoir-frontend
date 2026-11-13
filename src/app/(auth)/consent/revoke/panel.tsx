@@ -5,7 +5,7 @@ import { CardContent, CardDescription, CardHeader, CardTitle } from "@/component
 import { ConsentViewGate } from "@/components/consent/consent-view-gate";
 import { DecisionActions } from "@/components/consent/decision-actions";
 import { DecisionResultCard } from "@/components/consent/decision-result-card";
-import { useRevocationView, useConfirmRevocation } from "@/lib/commerce/consent";
+import { useRevocationView, useConfirmRevocation, handleConsentError } from "@/lib/commerce/consent";
 
 export function RevocationPanel() {
   const token = useSearchParams().get("token");
@@ -39,7 +39,8 @@ export function RevocationPanel() {
               primary={{
                 label: confirm.isPending ? "Revoking…" : "Confirm revocation",
                 pending: confirm.isPending,
-                onClick: () => token && confirm.mutate(token),
+                onClick: () =>
+                  token && confirm.mutate(token, { onError: (err) => handleConsentError(err, view.refetch) }),
               }}
             />
           </CardContent>

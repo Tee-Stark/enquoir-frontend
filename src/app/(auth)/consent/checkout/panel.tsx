@@ -15,6 +15,7 @@ import {
   useCheckoutApprovalView,
   useApproveCheckoutConsent,
   useRejectCheckoutConsent,
+  handleConsentError,
   type Checkout,
 } from "@/lib/commerce/consent";
 
@@ -29,11 +30,16 @@ function outcomeCard(checkout: Checkout) {
     );
   }
   if (checkout.status === "denied") {
+    const reasons = checkout.decision.reasons.map((r) => r.detail).join(" ");
     return (
       <DecisionResultCard
         tone="neutral"
         title="No longer fits your mandate"
-        description="Your approval was recorded, but this checkout was rechecked against your mandate's limits and no longer fits - it was not charged."
+        description={
+          reasons
+            ? `Your approval was recorded, but this checkout was rechecked and no longer fits: ${reasons}`
+            : "Your approval was recorded, but this checkout was rechecked against your mandate's limits and no longer fits - it was not charged."
+        }
       />
     );
   }
@@ -105,12 +111,19 @@ export function CheckoutApprovalPanel() {
                 primary={{
                   label: approve.isPending ? "Approving…" : "Approve",
                   pending: approve.isPending,
-                  onClick: () => token && approve.mutate({ token, checkout_hash: checkout.checkout_hash }),
+                  onClick: () =>
+                    token &&
+                    approve.mutate(
+                      { token, checkout_hash: checkout.checkout_hash },
+                      { onError: (err) => handleConsentError(err, view.refetch) },
+                    ),
                 }}
                 secondary={{
                   label: reject.isPending ? "Declining…" : "Decline",
                   pending: reject.isPending,
-                  onClick: () => token && reject.mutate(token),
+                  onClick: () =>
+                    token &&
+                    reject.mutate(token, { onError: (err) => handleConsentError(err, view.refetch) }),
                 }}
               />
             </CardContent>

@@ -1,7 +1,8 @@
 "use client";
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { api, unwrap } from "@/lib/api/client";
+import { toast } from "sonner";
+import { api, isApiError, problemMessage, unwrap } from "@/lib/api/client";
 import type { components } from "@/lib/api/schema";
 
 export type ConsentView = components["schemas"]["ConsentView"];
@@ -10,11 +11,25 @@ export type Mandate = components["schemas"]["Mandate"];
 export type Checkout = components["schemas"]["Checkout"];
 
 /**
- * All six hooks below are public and unauthenticated: a one-time token
+ * Every hook below is public and unauthenticated: a one-time token
  * from an emailed link is the only credential, never a session or a
  * merchant key. None of them touch the query cache - each is a one-shot
  * flow scoped to a single token, never revisited or invalidated.
  */
+
+/**
+ * Every consent decision mutation's onError: shows the problem, and -
+ * specifically for terms_mismatch/checkout_mismatch (409: the terms
+ * changed underneath this link, e.g. a stale re-send) - refetches the
+ * view so the next attempt uses the current hash instead of retrying
+ * the same stale one forever.
+ */
+export function handleConsentError(error: unknown, refetchView: () => void) {
+  toast.error(problemMessage(error));
+  if (isApiError(error) && (error.code === "terms_mismatch" || error.code === "checkout_mismatch")) {
+    refetchView();
+  }
+}
 
 // --- Mandate consent -------------------------------------------------
 
