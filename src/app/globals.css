@@ -78,7 +78,9 @@
   --ring: #8457e8;
   --radius: 0.5rem;
 
-  /* Status semantics, distinct from --accent (reserved for BLOCKED only) */
+  /* Status semantics, distinct from --accent (treasury's BLOCKED payment
+     state and commerce's denied checkout status share it - the same
+     "stopped by policy" meaning, never a third, unrelated use) */
   --success: #3fb97e;
   --success-foreground: #0b1f16;
   --warning: #e0a440;
