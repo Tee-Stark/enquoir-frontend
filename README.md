@@ -249,6 +249,6 @@ scripts/sync-openapi.sh     Re-vendors the spec + regenerates types.
 - The sidebar's collapsed state is the only thing persisted client-side
   (`localStorage`, per-viewer convenience only). Nothing else should be -
   session state belongs to the backend's cookie, not browser storage.
-- No policy/limits UI exists anywhere, by design - the API contract doesn't
-  expose policy configuration, and the spec is explicit that this must not
-  be invented ahead of the backend.
+- Policy/limits UI now exists (`/policy`) - the backend's Phase 6
+  (treasuries, spending policies, escalation) shipped its `policy_*`
+  routes, so this is no longer ahead of the backend.
