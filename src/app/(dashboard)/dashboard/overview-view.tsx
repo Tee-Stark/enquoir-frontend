@@ -53,6 +53,11 @@ export function OverviewView() {
         <SectionLabel>Operational</SectionLabel>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           <MetricCard label="In progress" value={payments.in_progress} tone="warning" />
+          <MetricCard
+            label="Awaiting approval"
+            value={payments.by_state.AWAITING_APPROVAL ?? 0}
+            tone="warning"
+          />
           <MetricCard label="Failed" value={payments.by_state.FAILED ?? 0} tone="destructive" />
           <MetricCard label="Active agents" value={submissions.active_agents} />
           <MetricCard label="Total submissions" value={submissions.total} />

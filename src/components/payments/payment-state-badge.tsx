@@ -29,6 +29,12 @@ export const PAYMENT_STATE_STYLE: Record<
     dotClassName: "bg-primary",
     chartColor: "var(--primary)",
   },
+  AWAITING_APPROVAL: {
+    label: "Awaiting approval",
+    tintClassName: "bg-warning/15 text-warning",
+    dotClassName: "bg-warning",
+    chartColor: "var(--warning)",
+  },
   AUTHORIZED: {
     label: "Authorized",
     tintClassName: "bg-primary/15 text-primary",
