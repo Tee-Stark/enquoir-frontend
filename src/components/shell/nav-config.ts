@@ -5,6 +5,7 @@ import {
   Activity,
   BarChart3,
   Bot,
+  Store,
   Landmark,
   Users,
   Mail,
@@ -40,6 +41,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Infrastructure",
     items: [
       { label: "Agents", href: "/agents", icon: Bot },
+      { label: "Merchant integrations", href: "/merchants", icon: Store },
       { label: "Beneficiaries", href: "/beneficiaries", icon: Landmark },
     ],
   },

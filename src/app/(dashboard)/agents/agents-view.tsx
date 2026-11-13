@@ -18,7 +18,7 @@ import { ErrorState } from "@/components/feedback/error-state";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { CreateAgentDialog } from "@/components/agents/create-agent-dialog";
-import { RevealApiKeyDialog } from "@/components/agents/reveal-api-key-dialog";
+import { RevealSecretDialog } from "@/components/shared/reveal-secret-dialog";
 import { problemMessage } from "@/lib/api/client";
 import { useSession } from "@/lib/auth/session";
 import {
@@ -144,7 +144,10 @@ export function AgentsView() {
         </Card>
       )}
 
-      <RevealApiKeyDialog issued={rotated} onClose={() => setRotated(null)} />
+      <RevealSecretDialog
+        issued={rotated && { title: `${rotated.agent.name} — API key`, secret: rotated.api_key.secret }}
+        onClose={() => setRotated(null)}
+      />
     </div>
   );
 }

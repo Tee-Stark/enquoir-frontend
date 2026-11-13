@@ -483,8 +483,24 @@ export interface paths {
          *     auth.password_changed, auth.sessions_revoked, member.invited,
          *     invitation.revoked, invitation.accepted, member.role_changed,
          *     member.removed, member.left, agent.created, agent.key_rotated,
-         *     agent.revoked, payee.registered. Payments have their own history
-         *     (GET /v1/payments/{key}).
+         *     agent.revoked, payee.registered, merchant_integration.created,
+         *     merchant_integration.disabled, merchant_integration.enabled,
+         *     merchant_integration.key_rotated, merchant_integration.key_revoked,
+         *     commerce.customer.registered, commerce.customer.disabled,
+         *     commerce.customer.enabled, commerce.agent.registered,
+         *     commerce.agent.disabled, commerce.agent.enabled,
+         *     commerce.funding_method.registered, commerce.funding_method.disabled,
+         *     commerce.funding_method.enabled, commerce.mandate.requested,
+         *     commerce.mandate.approved, commerce.mandate.rejected,
+         *     commerce.mandate.revocation_requested, commerce.mandate.revoked,
+         *     commerce.checkout.authorized, commerce.checkout.denied,
+         *     commerce.checkout.awaiting_approval, commerce.checkout.approved,
+         *     commerce.checkout.rejected, commerce.checkout.canceled,
+         *     commerce.authorization.grant_issued, commerce.authorization.redeemed,
+         *     commerce.execution.succeeded, commerce.execution.failed,
+         *     commerce.execution.unknown, commerce.execution.reconciled,
+         *     commerce.execution.report_refused. Payments have
+         *     their own history (GET /v1/payments/{key}).
          */
         get: operations["listAuditLog"];
         put?: never;
@@ -559,6 +575,967 @@ export interface paths {
          * @description The old key stops working at once. The new secret is shown only in this response.
          */
         post: operations["rotateAgentKey"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/merchant-integrations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the organisation's merchant integrations
+         * @description Oldest first, disabled ones included.
+         */
+        get: operations["listMerchantIntegrations"];
+        put?: never;
+        /**
+         * Connect a merchant and issue its key
+         * @description The response is the only time the key's secret is shown. Store it then.
+         */
+        post: operations["createMerchantIntegration"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/merchant-integrations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IntegrationID"];
+            };
+            cookie?: never;
+        };
+        /** Get a merchant integration */
+        get: operations["getMerchantIntegration"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/merchant-integrations/{id}/disable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IntegrationID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Disable a merchant integration
+         * @description Its key stops working at once. Its customers, agents and history
+         *     stay. Disabling a disabled integration succeeds and changes nothing.
+         */
+        post: operations["disableMerchantIntegration"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/merchant-integrations/{id}/enable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IntegrationID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Enable a disabled merchant integration
+         * @description Its active key, if it has one, works again. Needs a verified email.
+         */
+        post: operations["enableMerchantIntegration"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/merchant-integrations/{id}/rotate-key": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IntegrationID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Issue a new integration key
+         * @description Replaces the active key, which stops working at once, or issues one
+         *     to an integration whose key was revoked. The new secret is shown
+         *     only in this response. Needs a verified email.
+         */
+        post: operations["rotateMerchantIntegrationKey"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/merchant-integrations/{id}/key": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IntegrationID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Revoke the integration key
+         * @description The key stops working at once and no new one is issued: the merchant
+         *     is cut off until a key is rotated in. Revoking when there is no key
+         *     succeeds.
+         */
+        delete: operations["revokeMerchantIntegrationKey"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/commerce/customers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the merchant's customers
+         * @description Newest first.
+         */
+        get: operations["listCommerceCustomers"];
+        put?: never;
+        /**
+         * Register a customer, or resolve one already registered
+         * @description The email is where Enquoir will send the customer consent links, so
+         *     that spending authority never rests on the merchant's word. It is not
+         *     written to the audit log.
+         */
+        post: operations["registerCommerceCustomer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/commerce/customers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["CommerceCustomerID"];
+            };
+            cookie?: never;
+        };
+        /** Get a customer */
+        get: operations["getCommerceCustomer"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/commerce/customers/{id}/disable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["CommerceCustomerID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Disable a customer
+         * @description Disabling a disabled customer succeeds and changes nothing.
+         */
+        post: operations["disableCommerceCustomer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/commerce/customers/{id}/enable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["CommerceCustomerID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enable a customer */
+        post: operations["enableCommerceCustomer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/commerce/agents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the merchant's agents
+         * @description Newest first.
+         */
+        get: operations["listCommerceAgents"];
+        put?: never;
+        /**
+         * Register an AI agent, or resolve one already registered
+         * @description An agent the merchant runs - a shopping assistant, say. It holds no
+         *     credential; the merchant names it in later requests.
+         */
+        post: operations["registerCommerceAgent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/commerce/agents/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["CommerceAgentID"];
+            };
+            cookie?: never;
+        };
+        /** Get an agent */
+        get: operations["getCommerceAgent"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/commerce/agents/{id}/disable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["CommerceAgentID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Disable an agent
+         * @description Disabling a disabled agent succeeds and changes nothing.
+         */
+        post: operations["disableCommerceAgent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/commerce/agents/{id}/enable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["CommerceAgentID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enable an agent */
+        post: operations["enableCommerceAgent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/commerce/funding-methods": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Register a funding-method binding, or resolve one already registered
+         * @description Binds one of the merchant's active customers to a payment method the
+         *     merchant saved with its PSP, identified by the merchant's own
+         *     reference for it, the PSP's (`pm_...`), or both. Never card details
+         *     or PSP secret keys: undocumented fields are refused. Repeating it -
+         *     by either reference - returns the same binding; repeating it with
+         *     another customer, provider or display details, or adding or changing
+         *     a reference, is `409 registration_conflict`, as are references that
+         *     name two different bindings.
+         */
+        post: operations["registerFundingMethod"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/commerce/funding-methods/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["FundingMethodID"];
+            };
+            cookie?: never;
+        };
+        /** Get a funding-method binding */
+        get: operations["getFundingMethod"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/commerce/funding-methods/{id}/disable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["FundingMethodID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Disable a funding-method binding
+         * @description When the customer removes the payment method, say. Disabling a disabled binding succeeds and changes nothing.
+         */
+        post: operations["disableFundingMethod"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/commerce/funding-methods/{id}/enable": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["FundingMethodID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Enable a funding-method binding */
+        post: operations["enableFundingMethod"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/commerce/customers/{id}/funding-methods": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["CommerceCustomerID"];
+            };
+            cookie?: never;
+        };
+        /**
+         * List a customer's funding-method bindings
+         * @description Newest first. Another merchant's customer is `404`.
+         */
+        get: operations["listCustomerFundingMethods"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/commerce/mandate-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ask a customer for a mandate, or resolve a request already made
+         * @description Freezes the terms and emails the customer a one-time consent link
+         *     (1 hour). The response never contains the link. Repeating the request
+         *     (same `external_id`, same terms) returns it without another email;
+         *     different terms are `409 registration_conflict`.
+         */
+        post: operations["requestMandate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/commerce/mandate-requests/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["MandateRequestID"];
+            };
+            cookie?: never;
+        };
+        /** Get a mandate request and the customer's decision */
+        get: operations["getMandateRequest"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/commerce/mandates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the merchant's mandates
+         * @description Newest first. What to show a customer who asks what they have allowed.
+         */
+        get: operations["listMandates"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/commerce/mandates/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["MandateID"];
+            };
+            cookie?: never;
+        };
+        /** Get a mandate */
+        get: operations["getMandate"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/commerce/mandates/{id}/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["MandateID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ask to revoke a mandate, for the customer
+         * @description The mandate reads `revocation_pending` and grants nothing from now.
+         *     Enquoir emails the customer a one-time link (1 hour) to confirm;
+         *     only their confirmation revokes it. Unconfirmed, the request lapses
+         *     at `revocation_expires_at` and the mandate is active again. Asking
+         *     while one is pending, or after revocation, changes and sends nothing.
+         */
+        post: operations["revokeMandate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/consent/view": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Read the terms a consent link is for
+         * @description Does not spend the link.
+         */
+        post: operations["viewConsent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/consent/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Approve the terms, as the customer
+         * @description Creates the mandate and the consent record, and spends the link.
+         *     `terms_hash` must be the hash of the terms the page showed.
+         */
+        post: operations["approveConsent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/consent/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reject the terms, as the customer
+         * @description Records the rejection and spends the link. No mandate is created.
+         */
+        post: operations["rejectConsent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/consent/revocation/view": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Read the mandate a revocation link is for
+         * @description Does not spend the link.
+         */
+        post: operations["viewRevocation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/consent/revocation/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirm the revocation, as the customer
+         * @description Revokes the mandate for good and spends the link.
+         */
+        post: operations["confirmRevocation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/commerce/checkouts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the merchant's checkouts
+         * @description Newest first.
+         */
+        get: operations["listCheckouts"];
+        put?: never;
+        /**
+         * Submit a checkout for evaluation against a mandate
+         * @description From the merchant's server, priced by it: never prices an agent
+         *     asserts. The body is decoded strictly: an undocumented field is a 400
+         *     naming it. The decision is recorded and returned (201); repeating the
+         *     same checkout (`external_id`) returns it (200); a changed one under
+         *     the same `external_id` is `409 registration_conflict`. A mandate that
+         *     is not this merchant's is `422 mandate_unknown`; every other failure
+         *     is a recorded `denied` checkout with its reasons.
+         */
+        post: operations["submitCheckout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/commerce/checkouts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["CheckoutID"];
+            };
+            cookie?: never;
+        };
+        /** Get a checkout and its decision */
+        get: operations["getCheckout"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/commerce/checkouts/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["CheckoutID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancel an authorized checkout, or one awaiting the customer
+         * @description Releases what it counted against the mandate. Cancelling a cancelled
+         *     checkout succeeds and changes nothing; anything else is `409
+         *     checkout_not_cancelable`.
+         */
+        post: operations["cancelCheckout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/consent/checkout/view": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Read the checkout an approval link is for
+         * @description Does not spend the link.
+         */
+        post: operations["viewCheckoutApproval"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/consent/checkout/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Approve the checkout, as the customer
+         * @description `checkout_hash` must be the one the page showed. The mandate's limits
+         *     are checked again: a checkout that no longer fits comes back `denied`.
+         *     Spends the link.
+         */
+        post: operations["approveCheckout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/consent/checkout/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reject the checkout, as the customer
+         * @description Spends the link.
+         */
+        post: operations["rejectCheckout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/commerce/checkouts/{id}/grant": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["CheckoutID"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Issue (or reissue) the checkout's grant
+         * @description The first grant of a checkout the customer approved, or a replacement
+         *     for a lost one. The earlier secret stops working; the expiry stays the
+         *     authorization's. The secret is in `authorization.grant`, only in this
+         *     response.
+         */
+        post: operations["issueGrant"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/commerce/grants/redeem": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Redeem a grant before charging
+         * @description Checks the grant is this merchant's, unredeemed, unrevoked, unexpired,
+         *     for this checkout and version, and its mandate still active; then
+         *     creates the one execution: charge `amount_minor` of `currency` to
+         *     `funding_method`. Repeating it returns that execution (200), even after
+         *     the 15 minutes: never a second. The body is decoded strictly.
+         */
+        post: operations["redeemGrant"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/commerce/executions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        /** Get an execution, with its history */
+        get: operations["getExecution"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/commerce/executions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the merchant's executions
+         * @description Newest first.
+         */
+        get: operations["listExecutions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/commerce/executions/{id}/outcome": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Report a payment's outcome
+         * @description Your own report after charging, or - with `provider_event_id` - a PSP
+         *     webhook you verified. The outcome is your word; Enquoir checks it
+         *     against the execution. A direct report can't resolve `unknown`: use
+         *     `.../reconcile`.
+         */
+        post: operations["reportExecutionOutcome"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/commerce/executions/{id}/reconcile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Report what a lookup at the PSP found
+         * @description After looking the payment up at your PSP: resolves an `unknown`
+         *     outcome. A finished payment can't be contradicted.
+         */
+        post: operations["reconcileExecution"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/merchant-integrations/{id}/checkouts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IntegrationID"];
+            };
+            cookie?: never;
+        };
+        /**
+         * A merchant's checkouts, for the dashboard
+         * @description Read-only; any member.
+         */
+        get: operations["listIntegrationCheckouts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/merchant-integrations/{id}/mandates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IntegrationID"];
+            };
+            cookie?: never;
+        };
+        /**
+         * A merchant's mandates and their usage, for the dashboard
+         * @description Read-only; any member.
+         */
+        get: operations["listIntegrationMandates"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/merchant-integrations/{id}/executions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IntegrationID"];
+            };
+            cookie?: never;
+        };
+        /**
+         * A merchant's executions, for the dashboard
+         * @description Read-only; any member.
+         */
+        get: operations["listIntegrationExecutions"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -810,7 +1787,7 @@ export interface components {
             status: number;
             detail: string;
             /** @enum {string} */
-            code: "invalid_json" | "validation_failed" | "not_found" | "rail_rejected" | "internal_error" | "unauthenticated" | "invalid_credentials" | "email_taken" | "payee_unknown" | "forbidden_origin" | "not_implemented" | "body_too_large" | "forbidden" | "no_organisation" | "email_unverified" | "already_verified" | "token_invalid" | "last_owner" | "already_member" | "rate_limited" | "account_locked";
+            code: "invalid_json" | "validation_failed" | "not_found" | "rail_rejected" | "internal_error" | "unauthenticated" | "invalid_credentials" | "email_taken" | "payee_unknown" | "forbidden_origin" | "not_implemented" | "body_too_large" | "forbidden" | "no_organisation" | "email_unverified" | "already_verified" | "token_invalid" | "last_owner" | "already_member" | "rate_limited" | "account_locked" | "registration_conflict" | "customer_unknown" | "customer_disabled" | "agent_unknown" | "agent_disabled" | "funding_method_unknown" | "funding_method_disabled" | "terms_mismatch" | "mandate_unknown" | "checkout_mismatch" | "checkout_not_cancelable" | "grant_invalid" | "grant_expired" | "grant_revoked" | "grant_redeemed" | "grant_not_issuable" | "redemption_mismatch" | "mandate_not_active" | "report_mismatch" | "outcome_conflict" | "reconciliation_required" | "event_conflict";
             /** @description For `validation_failed`, the request field at fault, when known. */
             field?: string;
         };
@@ -1144,23 +2121,374 @@ export interface components {
                 created_at: string;
             };
         };
+        /**
+         * @description Whether a merchant integration, customer or agent may take part in commerce.
+         * @enum {string}
+         */
+        CommerceStatus: "active" | "disabled";
+        /**
+         * @description The merchant's own reference, unique per merchant and compared
+         *     exactly. Trimmed; no spaces or control characters inside.
+         */
+        ExternalID: string;
+        MerchantIntegration: {
+            id: string;
+            name: string;
+            status: components["schemas"]["CommerceStatus"];
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            disabled_at: string | null;
+            /** @description The active key, without its secret; null once revoked. */
+            key: {
+                id: string;
+                /** @description The first 12 characters of the key, to recognise it by. */
+                prefix: string;
+                /** Format: date-time */
+                created_at: string;
+                /** Format: date-time */
+                last_used_at: string | null;
+            } | null;
+        };
+        IssuedMerchantIntegration: {
+            integration: components["schemas"]["MerchantIntegration"];
+            key: {
+                id: string;
+                prefix: string;
+                /** @description The integration key. Shown only in this response; Enquoir stores only its hash. */
+                secret: string;
+                /** Format: date-time */
+                created_at: string;
+            };
+        };
+        /**
+         * @description The merchant's own ID for the saved payment method (its `mfm_...`),
+         *     unique per merchant. Not the PSP token, and never a card number: a
+         *     value with 12 or more digits in a row is refused.
+         */
+        FundingReference: string;
+        /**
+         * @description The PSP's ID for the saved payment method: Stripe's `pm_...`, Adyen's
+         *     `storedPaymentMethodId`. Unique per merchant and provider. It charges
+         *     nothing without your PSP secret key, which Enquoir never takes. A
+         *     card number - 13 to 19 digits with a valid Luhn checksum - is refused.
+         */
+        ProviderReference: string;
+        FundingMethod: {
+            /** @description Enquoir's binding ID (`fmb_...`). Mandates name it. */
+            id: string;
+            customer_id: string;
+            merchant_funding_method_id: string | null;
+            provider_method_reference: string | null;
+            provider: string;
+            display: {
+                brand: string;
+                last_four: string | null;
+            };
+            status: components["schemas"]["CommerceStatus"];
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            disabled_at: string | null;
+        };
+        /**
+         * @description Purchases within the scope go ahead on their own, or each needs the customer's approval.
+         * @enum {string}
+         */
+        ApprovalMode: "autonomous" | "per_transaction";
+        /**
+         * @description Only `active` grants anything. `suspended` while the customer, agent,
+         *     funding method or integration is disabled; `revocation_pending` while
+         *     a revocation awaits the customer's confirmation (at most an hour);
+         *     `expired` after `expires_at`; `revoked` once the customer confirmed.
+         * @enum {string}
+         */
+        MandateStatus: "active" | "suspended" | "revocation_pending" | "expired" | "revoked";
+        /** @description Exactly what the customer is asked to approve, frozen with the request. */
+        MandateTerms: {
+            merchant: components["schemas"]["NamedRef"];
+            customer_id: string;
+            agent: components["schemas"]["NamedRef"];
+            funding_method: {
+                id: string;
+                brand: string;
+                last_four: string | null;
+            };
+            approval_mode: components["schemas"]["ApprovalMode"];
+            scope: {
+                currency: string;
+                max_transaction_minor: number;
+                max_cumulative_minor: number;
+                /** @description null for no limit. */
+                max_transactions: number | null;
+                /** @description Empty for any. */
+                allowed_categories: string[];
+            };
+            /** Format: date-time */
+            expires_at: string;
+            /** @description `sha256:` and the SHA-256 of the canonical snapshot of these terms. */
+            terms_hash: string;
+        };
+        NamedRef: {
+            id: string;
+            name: string;
+        };
+        MandateRequest: {
+            id: string;
+            external_id: components["schemas"]["ExternalID"];
+            /** @enum {string} */
+            status: "pending" | "approved" | "rejected" | "expired";
+            terms: components["schemas"]["MandateTerms"];
+            /** Format: date-time */
+            created_at: string;
+            /**
+             * Format: date-time
+             * @description When the request, and its consent link, stop working (1 hour).
+             */
+            expires_at: string;
+            /** Format: date-time */
+            decided_at: string | null;
+            /** @description Once approved. */
+            mandate_id: string | null;
+        };
+        Mandate: {
+            id: string;
+            request_id: string;
+            /** @description The customer's recorded consent. */
+            consent_record_id: string;
+            status: components["schemas"]["MandateStatus"];
+            terms: components["schemas"]["MandateTerms"];
+            /** Format: date-time */
+            approved_at: string;
+            /** Format: date-time */
+            revoked_at: string | null;
+            /**
+             * Format: date-time
+             * @description While `revocation_pending`, when the request lapses unconfirmed.
+             */
+            revocation_expires_at: string | null;
+            /** @description What counts against it - on get and list; null elsewhere. */
+            usage: {
+                currency: string;
+                purchases: number;
+                /** @description null without a purchase limit. */
+                purchases_left: number | null;
+                /** @description Paid plus held. */
+                spent_minor: number;
+                paid_minor: number;
+                /** @description Authorized or redeemed, not yet settled (pending or unknown). */
+                held_minor: number;
+                remaining_minor: number;
+            } | null;
+        };
+        /**
+         * @description In minor units. `total_minor` must equal the items (quantity times
+         *     unit price) plus shipping, tax and fees, and be positive.
+         */
+        CheckoutLines: {
+            /** @enum {string} */
+            currency: "USD" | "EUR" | "GBP";
+            items: {
+                product_id: string;
+                name: string;
+                /** @description Checked against the mandate's allowed categories. */
+                category: string;
+                quantity: number;
+                unit_price_minor: number;
+            }[];
+            shipping_minor: number;
+            tax_minor: number;
+            fees_minor: number;
+            total_minor: number;
+        };
+        Checkout: {
+            id: string;
+            external_id: string;
+            mandate_id: string;
+            /**
+             * @description `expired`: awaited the customer past `approval_expires_at`, or its
+             *     grant went unredeemed past `authorization.expires_at`. `redeemed`:
+             *     its grant was redeemed (payment pending or unknown). `paid` and
+             *     `payment_failed`: the reported outcome. `revoked`: its mandate was
+             *     revoked before.
+             * @enum {string}
+             */
+            status: "authorized" | "awaiting_customer_approval" | "denied" | "rejected" | "canceled" | "expired" | "redeemed" | "revoked" | "paid" | "payment_failed";
+            decision: {
+                /** @description True only when `authorized`. */
+                allowed: boolean;
+                /** @description Every reason a `denied` checkout falls outside its mandate. */
+                reasons: {
+                    /** @enum {string} */
+                    code: "mandate_not_active" | "customer_mismatch" | "agent_mismatch" | "funding_method_mismatch" | "currency_mismatch" | "over_transaction_limit" | "category_not_allowed" | "over_transaction_count" | "over_budget";
+                    detail: string;
+                }[];
+            };
+            checkout: {
+                customer_id: string;
+                agent_id: string;
+                funding_method_id: string;
+                currency: string;
+                items: {
+                    product_id: string;
+                    name: string;
+                    category: string;
+                    quantity: number;
+                    unit_price_minor: number;
+                }[];
+                shipping_minor: number;
+                tax_minor: number;
+                fees_minor: number;
+                total_minor: number;
+            };
+            /** @description `sha256:` and the SHA-256 of the canonical snapshot of this checkout. */
+            checkout_hash: string;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            decided_at: string | null;
+            /** Format: date-time */
+            approval_expires_at: string | null;
+            /** Format: date-time */
+            canceled_at: string | null;
+            /** @description Once authorized. */
+            authorization: components["schemas"]["Authorization"] | null;
+        };
+        Authorization: {
+            id: string;
+            /** @enum {string} */
+            status: "active" | "redeemed" | "expired" | "revoked";
+            /** @description The grant's secret - only in the response that issued it. */
+            grant: string | null;
+            /** Format: date-time */
+            grant_issued_at: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /**
+             * Format: date-time
+             * @description 15 minutes after the checkout was authorized.
+             */
+            expires_at: string;
+            /** Format: date-time */
+            redeemed_at: string | null;
+            /** Format: date-time */
+            revoked_at: string | null;
+            execution_id: string | null;
+        };
+        /** @description The one payment a redeemed grant permits. */
+        Execution: {
+            id: string;
+            authorization_id: string;
+            checkout_id: string;
+            external_checkout_id: string;
+            checkout_hash: string;
+            mandate_id: string;
+            amount_minor: number;
+            currency: string;
+            funding_method: {
+                id: string;
+                provider: string;
+                merchant_funding_method_id: string | null;
+                provider_method_reference: string | null;
+                brand: string;
+                last_four: string | null;
+            };
+            /**
+             * @description The outcome is the merchant's word, checked against the execution.
+             * @enum {string}
+             */
+            status: "pending" | "succeeded" | "failed" | "unknown";
+            provider_payment_reference: string | null;
+            failure_reason: string | null;
+            /** @description Send it as your PSP request's idempotency key. */
+            idempotency_key: string;
+            /**
+             * Format: date-time
+             * @description Still pending then, it is presumed unknown.
+             */
+            report_deadline: string;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+            /** Format: date-time */
+            finished_at: string | null;
+        };
+        ExecutionReportResult: components["schemas"]["Execution"] & {
+            /** @enum {string} */
+            result: "applied" | "duplicate" | "ignored";
+        };
+        ExecutionDetail: components["schemas"]["Execution"] & {
+            history: {
+                sequence: number;
+                /** @enum {string} */
+                kind: "redeemed" | "reported" | "duplicate" | "ignored" | "refused" | "swept";
+                /** @description direct, webhook, reconciliation or sweep. */
+                source: string | null;
+                outcome: string | null;
+                status_after: string;
+                provider_payment_reference: string | null;
+                provider_event_id: string | null;
+                amount_minor: number | null;
+                currency: string | null;
+                /** @description Why a report was refused, or the reported failure reason. */
+                detail: string | null;
+                /** Format: date-time */
+                at: string;
+            }[];
+        };
+        ConsentView: {
+            request_id: string;
+            /** Format: date-time */
+            expires_at: string;
+            terms: components["schemas"]["MandateTerms"];
+        };
+        ConsentOutcome: {
+            request: components["schemas"]["MandateRequest"];
+            /** @description The mandate created, on approval; null on rejection. */
+            mandate: components["schemas"]["Mandate"] | null;
+        };
+        CommerceCustomer: {
+            id: string;
+            external_id: components["schemas"]["ExternalID"];
+            /** @description Lower-cased. Where consent links will go. */
+            email: string;
+            status: components["schemas"]["CommerceStatus"];
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            disabled_at: string | null;
+        };
+        CommerceAgent: {
+            id: string;
+            external_id: components["schemas"]["ExternalID"];
+            name: string;
+            status: components["schemas"]["CommerceStatus"];
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            disabled_at: string | null;
+        };
         AuditEvent: {
             id: string;
             action: string;
-            /** @description Who did it - a member, or an agent acting with its key. */
+            /**
+             * @description Who did it - a member, an agent acting with its key, or a merchant
+             *     integration acting with its key.
+             */
             actor: {
                 /** @enum {string} */
-                type: "user" | "agent";
+                type: "user" | "agent" | "merchant_integration";
                 id: string;
                 /** @description For a user. */
                 email: string | null;
-                /** @description For an agent. */
+                /** @description For an agent or a merchant integration. */
                 name: string | null;
             } | null;
             /** @description What it was done to. */
             target: {
                 /** @enum {string} */
-                type: "user" | "agent" | "invitation" | "payee";
+                type: "user" | "agent" | "invitation" | "payee" | "merchant_integration" | "commerce_customer" | "commerce_agent" | "commerce_funding_method" | "commerce_mandate_request" | "commerce_mandate" | "commerce_checkout" | "commerce_authorization" | "commerce_execution";
                 id: string;
             } | null;
             details: {
@@ -1201,9 +2529,10 @@ export interface components {
          *
          *     | | owner | admin | operator | viewer |
          *     |---|---|---|---|---|
-         *     | View payments, attempts, replay, analytics, payees, agents, members | ✓ | ✓ | ✓ | ✓ |
+         *     | View payments, attempts, replay, analytics, payees, agents, members, merchant integrations | ✓ | ✓ | ✓ | ✓ |
          *     | Create, rotate, revoke agents; register payees | ✓ | ✓ | ✓ | |
          *     | Invite and remove members, change roles up to admin; audit log | ✓ | ✓ | | |
+         *     | Create, disable, enable merchant integrations; issue and revoke their keys | ✓ | ✓ | | |
          *     | Manage admins and owners | ✓ | | | |
          *
          *     Nobody grants a role above their own; only an owner changes a member
@@ -1337,7 +2666,8 @@ export interface components {
          *     it from an origin not in CORS_ALLOWED_ORIGINS (`forbidden_origin`),
          *     on log-in, the account belongs to no organisation (`no_organisation`),
          *     or the action needs a verified email address (`email_unverified`:
-         *     creating or rotating agent keys, inviting, registering payees).
+         *     creating or rotating agent keys, inviting, registering payees,
+         *     creating, enabling or re-keying merchant integrations).
          */
         Forbidden: {
             headers: {
@@ -1364,6 +2694,45 @@ export interface components {
         TooManyRequests: {
             headers: {
                 "Retry-After"?: number;
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
+        /**
+         * @description The customer is not one this merchant registered
+         *     (`customer_unknown`), or is disabled (`customer_disabled`).
+         */
+        CustomerNotBindable: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
+        /**
+         * @description Something the request names is not this merchant's, or is disabled:
+         *     `customer_unknown`, `customer_disabled`, `agent_unknown`,
+         *     `agent_disabled`, `funding_method_unknown` (also: not this
+         *     customer's), `funding_method_disabled`.
+         */
+        MandatePartyUnusable: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
+        /**
+         * @description The merchant already registered this external ID with different
+         *     details (`registration_conflict`). Repeating a registration is safe;
+         *     changing one is not done by repeating it.
+         */
+        RegistrationConflict: {
+            headers: {
                 [name: string]: unknown;
             };
             content: {
@@ -1409,6 +2778,16 @@ export interface components {
         Limit: number;
         /** @description The `next_cursor` of the previous page. */
         Cursor: string;
+        IntegrationID: string;
+        CommerceCustomerID: string;
+        CommerceAgentID: string;
+        FundingMethodID: string;
+        MandateRequestID: string;
+        MandateID: string;
+        CheckoutID: string;
+        /** @description Only the record with this external ID. */
+        ExternalIDFilter: string;
+        CommerceStatusFilter: components["schemas"]["CommerceStatus"];
         AgentID: string;
         /** @description The intent key returned on submission. */
         IntentKey: string;
@@ -2387,6 +3766,1676 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
+            500: components["responses"]["InternalError"];
+        };
+    };
+    listMerchantIntegrations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The integrations. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["MerchantIntegration"][];
+                    };
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    createMerchantIntegration: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The merchant or storefront, as people will recognise it. */
+                    name: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Created. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IssuedMerchantIntegration"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
+            413: components["responses"]["BodyTooLarge"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    getMerchantIntegration: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IntegrationID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The integration. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MerchantIntegration"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    disableMerchantIntegration: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IntegrationID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Disabled. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MerchantIntegration"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    enableMerchantIntegration: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IntegrationID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Enabled. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MerchantIntegration"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    rotateMerchantIntegrationKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IntegrationID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Issued. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IssuedMerchantIntegration"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    revokeMerchantIntegrationKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IntegrationID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Revoked. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    listCommerceCustomers: {
+        parameters: {
+            query?: {
+                /** @description Only the record with this external ID. */
+                external_id?: components["parameters"]["ExternalIDFilter"];
+                status?: components["parameters"]["CommerceStatusFilter"];
+                /** @description Page size, 1 to 200. Default 50. */
+                limit?: components["parameters"]["Limit"];
+                /** @description The `next_cursor` of the previous page. */
+                cursor?: components["parameters"]["Cursor"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page of customers. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["CommerceCustomer"][];
+                        next_cursor: components["schemas"]["NextCursor"];
+                    };
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthenticated"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    registerCommerceCustomer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    external_id: components["schemas"]["ExternalID"];
+                    /** Format: email */
+                    email: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Already registered with these details: the same customer. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommerceCustomer"];
+                };
+            };
+            /** @description Registered. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommerceCustomer"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthenticated"];
+            409: components["responses"]["RegistrationConflict"];
+            413: components["responses"]["BodyTooLarge"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    getCommerceCustomer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["CommerceCustomerID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The customer. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommerceCustomer"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    disableCommerceCustomer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["CommerceCustomerID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Disabled. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommerceCustomer"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    enableCommerceCustomer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["CommerceCustomerID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Enabled. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommerceCustomer"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    listCommerceAgents: {
+        parameters: {
+            query?: {
+                /** @description Only the record with this external ID. */
+                external_id?: components["parameters"]["ExternalIDFilter"];
+                status?: components["parameters"]["CommerceStatusFilter"];
+                /** @description Page size, 1 to 200. Default 50. */
+                limit?: components["parameters"]["Limit"];
+                /** @description The `next_cursor` of the previous page. */
+                cursor?: components["parameters"]["Cursor"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page of agents. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["CommerceAgent"][];
+                        next_cursor: components["schemas"]["NextCursor"];
+                    };
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthenticated"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    registerCommerceAgent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    external_id: components["schemas"]["ExternalID"];
+                    name: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Already registered with these details: the same agent. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommerceAgent"];
+                };
+            };
+            /** @description Registered. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommerceAgent"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthenticated"];
+            409: components["responses"]["RegistrationConflict"];
+            413: components["responses"]["BodyTooLarge"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    getCommerceAgent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["CommerceAgentID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The agent. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommerceAgent"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    disableCommerceAgent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["CommerceAgentID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Disabled. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommerceAgent"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    enableCommerceAgent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["CommerceAgentID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Enabled. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommerceAgent"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    registerFundingMethod: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Enquoir's customer ID (`cus_...`), from POST /v1/commerce/customers. */
+                    customer_id: string;
+                    /** @description The PSP, e.g. `stripe`. Lower-cased. */
+                    provider: string;
+                    merchant_funding_method_id?: components["schemas"]["FundingReference"];
+                    provider_method_reference?: components["schemas"]["ProviderReference"];
+                    display: {
+                        /** @description e.g. `visa`, `paypal`. Letters, `_` and `-` only. */
+                        brand: string;
+                        /** @description For cards and accounts; omit for wallets. */
+                        last_four?: string;
+                    };
+                };
+            };
+        };
+        responses: {
+            /** @description Already registered with these details: the same binding. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FundingMethod"];
+                };
+            };
+            /** @description Registered. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FundingMethod"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthenticated"];
+            409: components["responses"]["RegistrationConflict"];
+            413: components["responses"]["BodyTooLarge"];
+            422: components["responses"]["CustomerNotBindable"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    getFundingMethod: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["FundingMethodID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The binding. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FundingMethod"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    disableFundingMethod: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["FundingMethodID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Disabled. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FundingMethod"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    enableFundingMethod: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["FundingMethodID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Enabled. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FundingMethod"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    listCustomerFundingMethods: {
+        parameters: {
+            query?: {
+                status?: components["parameters"]["CommerceStatusFilter"];
+                /** @description Page size, 1 to 200. Default 50. */
+                limit?: components["parameters"]["Limit"];
+                /** @description The `next_cursor` of the previous page. */
+                cursor?: components["parameters"]["Cursor"];
+            };
+            header?: never;
+            path: {
+                id: components["parameters"]["CommerceCustomerID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page of bindings. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["FundingMethod"][];
+                        next_cursor: components["schemas"]["NextCursor"];
+                    };
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthenticated"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    requestMandate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    external_id: components["schemas"]["ExternalID"];
+                    customer_id: string;
+                    agent_id: string;
+                    /** @description One of this customer's funding methods. */
+                    funding_method_id: string;
+                    approval_mode: components["schemas"]["ApprovalMode"];
+                    scope: {
+                        /** @enum {string} */
+                        currency: "USD" | "EUR" | "GBP";
+                        /** @description The most one purchase may cost, in minor units (cents). */
+                        max_transaction_minor: number;
+                        /** @description The most all purchases together may cost; at least max_transaction_minor. */
+                        max_cumulative_minor: number;
+                        /** @description The most purchases; 0 or omitted for no limit. */
+                        max_transactions?: number;
+                        /** @description Product categories allowed; empty or omitted for any. */
+                        allowed_categories?: string[];
+                    };
+                    /**
+                     * Format: date-time
+                     * @description In the future, at most 90 days ahead. Kept to the second.
+                     */
+                    expires_at: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Already requested with these terms: the same request. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MandateRequest"];
+                };
+            };
+            /** @description Requested; the consent email is on its way. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MandateRequest"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthenticated"];
+            409: components["responses"]["RegistrationConflict"];
+            413: components["responses"]["BodyTooLarge"];
+            422: components["responses"]["MandatePartyUnusable"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    getMandateRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["MandateRequestID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The request. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MandateRequest"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    listMandates: {
+        parameters: {
+            query?: {
+                customer_id?: string;
+                status?: components["schemas"]["MandateStatus"];
+                /** @description Page size, 1 to 200. Default 50. */
+                limit?: components["parameters"]["Limit"];
+                /** @description The `next_cursor` of the previous page. */
+                cursor?: components["parameters"]["Cursor"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page of mandates. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["Mandate"][];
+                        next_cursor: components["schemas"]["NextCursor"];
+                    };
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthenticated"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    getMandate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["MandateID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The mandate. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Mandate"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    revokeMandate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["MandateID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Asked: see `status` (`revocation_pending`, or `revoked` if it already was). */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Mandate"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    viewConsent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The `token` from the consent link. */
+                    token: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The terms to show the customer. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentView"];
+                };
+            };
+            /** @description The link is unknown, spent or expired, or its request was decided or has expired (`token_invalid`); or the body is not JSON. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            500: components["responses"]["InternalError"];
+        };
+    };
+    approveConsent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    token: string;
+                    /** @description The `terms.terms_hash` from POST /v1/consent/view. */
+                    terms_hash: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Approved: the mandate. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentOutcome"];
+                };
+            };
+            /** @description The link is unknown, spent or expired, or its request was decided or has expired (`token_invalid`); or the body is not JSON. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description terms_hash is not this request's (`terms_mismatch`). The link is not spent. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            500: components["responses"]["InternalError"];
+        };
+    };
+    rejectConsent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The `token` from the consent link. */
+                    token: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Rejected. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConsentOutcome"];
+                };
+            };
+            /** @description The link is unknown, spent or expired, or its request was decided or has expired (`token_invalid`); or the body is not JSON. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            500: components["responses"]["InternalError"];
+        };
+    };
+    viewRevocation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The `token` from the revocation link. */
+                    token: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The mandate, `revocation_pending`. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Mandate"];
+                };
+            };
+            /** @description The link is unknown, spent or expired, or no revocation is pending (`token_invalid`); or the body is not JSON. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            500: components["responses"]["InternalError"];
+        };
+    };
+    confirmRevocation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The `token` from the revocation link. */
+                    token: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Revoked. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Mandate"];
+                };
+            };
+            /** @description The link is unknown, spent or expired, or no revocation is pending (`token_invalid`); or the body is not JSON. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            500: components["responses"]["InternalError"];
+        };
+    };
+    listCheckouts: {
+        parameters: {
+            query?: {
+                mandate_id?: string;
+                customer_id?: string;
+                /** @description The effective status (see Checkout). */
+                status?: string;
+                /** @description Page size, 1 to 200. Default 50. */
+                limit?: components["parameters"]["Limit"];
+                /** @description The `next_cursor` of the previous page. */
+                cursor?: components["parameters"]["Cursor"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page of checkouts. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["Checkout"][];
+                        next_cursor: components["schemas"]["NextCursor"];
+                    };
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthenticated"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    submitCheckout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    external_id: components["schemas"]["ExternalID"];
+                    mandate_id: string;
+                    customer_id: string;
+                    agent_id: string;
+                    funding_method_id: string;
+                    checkout: components["schemas"]["CheckoutLines"];
+                };
+            };
+        };
+        responses: {
+            /** @description Already submitted: the same checkout. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Checkout"];
+                };
+            };
+            /** @description Evaluated: see `status` and `decision`. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Checkout"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthenticated"];
+            409: components["responses"]["RegistrationConflict"];
+            413: components["responses"]["BodyTooLarge"];
+            /** @description The mandate is not this merchant's (`mandate_unknown`). */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            500: components["responses"]["InternalError"];
+        };
+    };
+    getCheckout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["CheckoutID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The checkout. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Checkout"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    cancelCheckout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["CheckoutID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Cancelled. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Checkout"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            404: components["responses"]["NotFound"];
+            /** @description Not authorized or awaiting approval (`checkout_not_cancelable`). */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            500: components["responses"]["InternalError"];
+        };
+    };
+    viewCheckoutApproval: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The `token` from the approval link. */
+                    token: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The checkout to show the customer. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Checkout"];
+                };
+            };
+            /** @description The link is unknown, spent or expired, or the checkout is no longer awaiting approval (`token_invalid`); or the body is not JSON. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            500: components["responses"]["InternalError"];
+        };
+    };
+    approveCheckout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    token: string;
+                    checkout_hash: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Decided: `authorized`, or `denied` on the recheck. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Checkout"];
+                };
+            };
+            /** @description The link is unknown, spent or expired, or the checkout is no longer awaiting approval (`token_invalid`); or the body is not JSON. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Not the checkout awaiting approval (`checkout_mismatch`). The link is not spent. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            500: components["responses"]["InternalError"];
+        };
+    };
+    rejectCheckout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The `token` from the approval link. */
+                    token: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Rejected. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Checkout"];
+                };
+            };
+            /** @description The link is unknown, spent or expired, or the checkout is no longer awaiting approval (`token_invalid`); or the body is not JSON. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            500: components["responses"]["InternalError"];
+        };
+    };
+    issueGrant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["CheckoutID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Issued. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Checkout"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            404: components["responses"]["NotFound"];
+            /** @description Already redeemed (`grant_redeemed`), or no active authorization: not authorized, expired, cancelled or revoked (`grant_not_issuable`). */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            500: components["responses"]["InternalError"];
+        };
+    };
+    redeemGrant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The `enq_gr_...` secret. */
+                    grant: string;
+                    external_checkout_id: string;
+                    /** @description The `checkout_hash` of the checkout being charged. */
+                    checkout_hash: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Already redeemed: the same execution. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Execution"];
+                };
+            };
+            /** @description Redeemed: the execution. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Execution"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthenticated"];
+            /** @description The grant is for another checkout or version (`redemption_mismatch`). */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            413: components["responses"]["BodyTooLarge"];
+            /** @description Not this merchant's grant, made up or replaced (`grant_invalid`); expired (`grant_expired`); revoked (`grant_revoked`); or the mandate is paused, revoked or expired (`mandate_not_active`). */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            500: components["responses"]["InternalError"];
+        };
+    };
+    getExecution: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The execution and every report on it, in order. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExecutionDetail"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    listExecutions: {
+        parameters: {
+            query?: {
+                /** @description `unknown` is the reconciliation queue. */
+                status?: "pending" | "succeeded" | "failed" | "unknown";
+                mandate_id?: string;
+                /** @description Page size, 1 to 200. Default 50. */
+                limit?: components["parameters"]["Limit"];
+                /** @description The `next_cursor` of the previous page. */
+                cursor?: components["parameters"]["Cursor"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page of executions. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["Execution"][];
+                        next_cursor: components["schemas"]["NextCursor"];
+                    };
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthenticated"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    reportExecutionOutcome: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    outcome: "succeeded" | "failed" | "unknown";
+                    provider: string;
+                    /** @description The PSP's payment ID. Required for succeeded. */
+                    provider_payment_reference?: string;
+                    /** @description A verified PSP webhook's event ID. Makes this a webhook report. */
+                    provider_event_id?: string;
+                    amount_minor: number;
+                    currency: string;
+                    /** @description e.g. the PSP's decline code. Never card data. */
+                    failure_reason?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Recorded: see `result` - applied, duplicate (nothing changed) or ignored (older than what is recorded). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExecutionReportResult"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthenticated"];
+            404: components["responses"]["NotFound"];
+            /** @description Contradicts a finished payment (`outcome_conflict`), an unknown outcome needs reconciling (`reconciliation_required`), or the webhook event ID reported something else (`event_conflict`). Recorded for investigation. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            413: components["responses"]["BodyTooLarge"];
+            /** @description Not the execution's amount, currency, provider or payment reference (`report_mismatch`). Recorded for investigation. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            500: components["responses"]["InternalError"];
+        };
+    };
+    reconcileExecution: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    outcome: "succeeded" | "failed" | "unknown";
+                    provider: string;
+                    /** @description The PSP's payment ID. Required for succeeded. */
+                    provider_payment_reference?: string;
+                    amount_minor: number;
+                    currency: string;
+                    /** @description e.g. the PSP's decline code. Never card data. */
+                    failure_reason?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Recorded: see `result` - applied, duplicate (nothing changed) or ignored (older than what is recorded). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExecutionReportResult"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthenticated"];
+            404: components["responses"]["NotFound"];
+            /** @description Contradicts a finished payment (`outcome_conflict`), an unknown outcome needs reconciling (`reconciliation_required`), or the webhook event ID reported something else (`event_conflict`). Recorded for investigation. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            413: components["responses"]["BodyTooLarge"];
+            /** @description Not the execution's amount, currency, provider or payment reference (`report_mismatch`). Recorded for investigation. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            500: components["responses"]["InternalError"];
+        };
+    };
+    listIntegrationCheckouts: {
+        parameters: {
+            query?: {
+                mandate_id?: string;
+                customer_id?: string;
+                /** @description The effective status (see Checkout). */
+                status?: string;
+                /** @description Page size, 1 to 200. Default 50. */
+                limit?: components["parameters"]["Limit"];
+                /** @description The `next_cursor` of the previous page. */
+                cursor?: components["parameters"]["Cursor"];
+            };
+            header?: never;
+            path: {
+                id: components["parameters"]["IntegrationID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page of checkouts. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["Checkout"][];
+                        next_cursor: components["schemas"]["NextCursor"];
+                    };
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    listIntegrationMandates: {
+        parameters: {
+            query?: {
+                customer_id?: string;
+                status?: components["schemas"]["MandateStatus"];
+                /** @description Page size, 1 to 200. Default 50. */
+                limit?: components["parameters"]["Limit"];
+                /** @description The `next_cursor` of the previous page. */
+                cursor?: components["parameters"]["Cursor"];
+            };
+            header?: never;
+            path: {
+                id: components["parameters"]["IntegrationID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page of mandates. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["Mandate"][];
+                        next_cursor: components["schemas"]["NextCursor"];
+                    };
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    listIntegrationExecutions: {
+        parameters: {
+            query?: {
+                /** @description `unknown` is the reconciliation queue. */
+                status?: "pending" | "succeeded" | "failed" | "unknown";
+                mandate_id?: string;
+                /** @description Page size, 1 to 200. Default 50. */
+                limit?: components["parameters"]["Limit"];
+                /** @description The `next_cursor` of the previous page. */
+                cursor?: components["parameters"]["Cursor"];
+            };
+            header?: never;
+            path: {
+                id: components["parameters"]["IntegrationID"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page of executions. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["Execution"][];
+                        next_cursor: components["schemas"]["NextCursor"];
+                    };
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             500: components["responses"]["InternalError"];
         };
     };
