@@ -20,6 +20,7 @@ import { EmptyState } from "@/components/feedback/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { CreateMerchantIntegrationDialog } from "@/components/merchants/create-merchant-integration-dialog";
 import { RevealSecretDialog } from "@/components/shared/reveal-secret-dialog";
+import { ConfirmButton } from "@/components/shared/confirm-button";
 import { problemMessage } from "@/lib/api/client";
 import { useSession } from "@/lib/auth/session";
 import {
@@ -144,32 +145,54 @@ export function MerchantsView() {
                               Enable
                             </Button>
                           )}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            disabled={!canGrant || rotateKey.isPending}
-                            onClick={() =>
-                              rotateKey.mutate(integration.id, {
-                                onSuccess: (data) => setIssued(data),
-                                onError: (err) => toast.error(problemMessage(err)),
-                              })
-                            }
-                          >
-                            {integration.key ? "Rotate key" : "Issue key"}
-                          </Button>
-                          {integration.key && (
+                          {integration.key ? (
+                            <ConfirmButton
+                              variant="ghost"
+                              size="sm"
+                              disabled={!canGrant || rotateKey.isPending}
+                              title="Rotate this integration's key?"
+                              description="The current key stops working immediately. Make sure the merchant is ready to switch to the new one before continuing."
+                              confirmLabel="Rotate key"
+                              onConfirm={() =>
+                                rotateKey.mutate(integration.id, {
+                                  onSuccess: (data) => setIssued(data),
+                                  onError: (err) => toast.error(problemMessage(err)),
+                                })
+                              }
+                            >
+                              Rotate key
+                            </ConfirmButton>
+                          ) : (
                             <Button
+                              variant="ghost"
+                              size="sm"
+                              disabled={!canGrant || rotateKey.isPending}
+                              onClick={() =>
+                                rotateKey.mutate(integration.id, {
+                                  onSuccess: (data) => setIssued(data),
+                                  onError: (err) => toast.error(problemMessage(err)),
+                                })
+                              }
+                            >
+                              Issue key
+                            </Button>
+                          )}
+                          {integration.key && (
+                            <ConfirmButton
                               variant="destructive"
                               size="sm"
                               disabled={revokeKey.isPending}
-                              onClick={() =>
+                              title="Revoke this integration's key?"
+                              description="The merchant immediately loses the ability to call Enquoir with it. This cannot be undone - issue a new key afterwards if they still need access."
+                              confirmLabel="Revoke key"
+                              onConfirm={() =>
                                 revokeKey.mutate(integration.id, {
                                   onError: (err) => toast.error(problemMessage(err)),
                                 })
                               }
                             >
                               Revoke key
-                            </Button>
+                            </ConfirmButton>
                           )}
                         </div>
                       </TableCell>
