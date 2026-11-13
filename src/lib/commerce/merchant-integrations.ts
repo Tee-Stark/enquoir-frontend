@@ -32,19 +32,30 @@ export function useCreateMerchantIntegration() {
     mutationFn: (name: string) =>
       unwrap(api.POST("/v1/merchant-integrations", { body: { name } })),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: INTEGRATIONS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: INTEGRATIONS_QUERY_KEY, exact: true });
     },
   });
 }
 
+/**
+ * Every mutation below invalidates the list and that one integration's
+ * own detail with `exact: true` - without it, TanStack Query's default
+ * prefix matching means invalidating `["merchant-integrations"]` (the
+ * list) also cascades into the detail query for every integration ever
+ * loaded, and invalidating `["merchant-integrations", id]` (the detail)
+ * cascades into that integration's own checkouts/mandates/executions
+ * queries (`["merchant-integrations", id, "checkouts"]` etc. - see
+ * integration-activity.ts), none of which these actions actually
+ * change.
+ */
 export function useDisableMerchantIntegration() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) =>
       unwrap(api.POST("/v1/merchant-integrations/{id}/disable", { params: { path: { id } } })),
     onSuccess: (_data, id) => {
-      queryClient.invalidateQueries({ queryKey: INTEGRATIONS_QUERY_KEY });
-      queryClient.invalidateQueries({ queryKey: integrationKey(id) });
+      queryClient.invalidateQueries({ queryKey: INTEGRATIONS_QUERY_KEY, exact: true });
+      queryClient.invalidateQueries({ queryKey: integrationKey(id), exact: true });
     },
   });
 }
@@ -55,8 +66,8 @@ export function useEnableMerchantIntegration() {
     mutationFn: (id: string) =>
       unwrap(api.POST("/v1/merchant-integrations/{id}/enable", { params: { path: { id } } })),
     onSuccess: (_data, id) => {
-      queryClient.invalidateQueries({ queryKey: INTEGRATIONS_QUERY_KEY });
-      queryClient.invalidateQueries({ queryKey: integrationKey(id) });
+      queryClient.invalidateQueries({ queryKey: INTEGRATIONS_QUERY_KEY, exact: true });
+      queryClient.invalidateQueries({ queryKey: integrationKey(id), exact: true });
     },
   });
 }
@@ -68,8 +79,8 @@ export function useRotateMerchantIntegrationKey() {
     mutationFn: (id: string) =>
       unwrap(api.POST("/v1/merchant-integrations/{id}/rotate-key", { params: { path: { id } } })),
     onSuccess: (_data, id) => {
-      queryClient.invalidateQueries({ queryKey: INTEGRATIONS_QUERY_KEY });
-      queryClient.invalidateQueries({ queryKey: integrationKey(id) });
+      queryClient.invalidateQueries({ queryKey: INTEGRATIONS_QUERY_KEY, exact: true });
+      queryClient.invalidateQueries({ queryKey: integrationKey(id), exact: true });
     },
   });
 }
@@ -80,8 +91,8 @@ export function useRevokeMerchantIntegrationKey() {
     mutationFn: (id: string) =>
       unwrap(api.DELETE("/v1/merchant-integrations/{id}/key", { params: { path: { id } } })),
     onSuccess: (_data, id) => {
-      queryClient.invalidateQueries({ queryKey: INTEGRATIONS_QUERY_KEY });
-      queryClient.invalidateQueries({ queryKey: integrationKey(id) });
+      queryClient.invalidateQueries({ queryKey: INTEGRATIONS_QUERY_KEY, exact: true });
+      queryClient.invalidateQueries({ queryKey: integrationKey(id), exact: true });
     },
   });
 }
