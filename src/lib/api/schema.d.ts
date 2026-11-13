@@ -717,6 +717,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/policies/current": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read the organisation's current spending policy
+         * @description Any member may read it. A new version 0 (every limit unlimited) is returned if the organisation has never edited one.
+         */
+        get: operations["getCurrentPolicy"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/policies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Replace the organisation's spending policy with a new version
+         * @description Owners and admins only, with a verified email. Every edit is a new version, never a mutation; past decisions keep reading back the version they used.
+         */
+        put: operations["updatePolicy"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/policies/dry-run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Evaluate a candidate payment without moving or reserving anything
+         * @description Owners and admins only - it reveals how close the organisation is to its limits.
+         */
+        post: operations["dryRunPolicy"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/commerce/customers": {
         parameters: {
             query?: never;
@@ -1614,6 +1674,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/payments/{key}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The intent key returned on submission. */
+                key: components["parameters"]["IntentKey"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Approve a payment the organisation's policy escalated
+         * @description Owners and admins only, with a verified email. The payment must
+         *     currently be AWAITING_APPROVAL. Rechecks the policy before
+         *     authorizing - a decision that was fine when escalated can still
+         *     be refused now. The member who created the paying agent cannot
+         *     approve its own payment unless they are the organisation's only
+         *     eligible owner or admin, in which case the exclusion is waived.
+         */
+        post: operations["approveEscalatedPayment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/payments/{key}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The intent key returned on submission. */
+                key: components["parameters"]["IntentKey"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reject a payment the organisation's policy escalated
+         * @description Owners and admins only. The payment must currently be AWAITING_APPROVAL. Unlike approval, rejection is never excluded - it is not a conflict of interest the way approval is.
+         */
+        post: operations["rejectEscalatedPayment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/analytics/summary": {
         parameters: {
             query?: never;
@@ -1787,7 +1898,7 @@ export interface components {
             status: number;
             detail: string;
             /** @enum {string} */
-            code: "invalid_json" | "validation_failed" | "not_found" | "rail_rejected" | "internal_error" | "unauthenticated" | "invalid_credentials" | "email_taken" | "payee_unknown" | "forbidden_origin" | "not_implemented" | "body_too_large" | "forbidden" | "no_organisation" | "email_unverified" | "already_verified" | "token_invalid" | "last_owner" | "already_member" | "rate_limited" | "account_locked" | "registration_conflict" | "customer_unknown" | "customer_disabled" | "agent_unknown" | "agent_disabled" | "funding_method_unknown" | "funding_method_disabled" | "terms_mismatch" | "mandate_unknown" | "checkout_mismatch" | "checkout_not_cancelable" | "grant_invalid" | "grant_expired" | "grant_revoked" | "grant_redeemed" | "grant_not_issuable" | "redemption_mismatch" | "mandate_not_active" | "report_mismatch" | "outcome_conflict" | "reconciliation_required" | "event_conflict";
+            code: "invalid_json" | "validation_failed" | "not_found" | "rail_rejected" | "internal_error" | "unauthenticated" | "invalid_credentials" | "email_taken" | "payee_unknown" | "policy_denied" | "not_awaiting_approval" | "approver_excluded" | "forbidden_origin" | "not_implemented" | "body_too_large" | "forbidden" | "no_organisation" | "email_unverified" | "already_verified" | "token_invalid" | "last_owner" | "already_member" | "rate_limited" | "account_locked" | "registration_conflict" | "customer_unknown" | "customer_disabled" | "agent_unknown" | "agent_disabled" | "funding_method_unknown" | "funding_method_disabled" | "terms_mismatch" | "mandate_unknown" | "checkout_mismatch" | "checkout_not_cancelable" | "grant_invalid" | "grant_expired" | "grant_revoked" | "grant_redeemed" | "grant_not_issuable" | "redemption_mismatch" | "mandate_not_active" | "report_mismatch" | "outcome_conflict" | "reconciliation_required" | "event_conflict";
             /** @description For `validation_failed`, the request field at fault, when known. */
             field?: string;
         };
@@ -1844,7 +1955,7 @@ export interface components {
          *     worker (nothing has happened to it yet).
          * @enum {string}
          */
-        PaymentState: "RECEIVED" | "PROPOSED" | "AUTHORIZED" | "IN_FLIGHT" | "UNKNOWN" | "APPLIED" | "FAILED" | "BLOCKED";
+        PaymentState: "RECEIVED" | "PROPOSED" | "AWAITING_APPROVAL" | "AUTHORIZED" | "IN_FLIGHT" | "UNKNOWN" | "APPLIED" | "FAILED" | "BLOCKED";
         Payment: {
             key: string;
             state: components["schemas"]["PaymentState"];
@@ -1860,6 +1971,8 @@ export interface components {
             transfer_id: string | null;
             /** @description Why it is FAILED or BLOCKED. */
             failure_reason: string | null;
+            /** @description The policy version that decided it (Allow or Escalate), null if no policy was configured at submission. */
+            policy_version: number | null;
             /** Format: date-time */
             created_at: string;
             /** Format: date-time */
@@ -1903,14 +2016,16 @@ export interface components {
         /**
          * @description Agent submissions: started (a new payment began), attached (joined a
          *     run already starting), deduplicated (already had history; nothing
-         *     started), invalid, payee_unknown, error.
+         *     started), invalid, payee_unknown, policy_denied (the organisation's
+         *     spending policy denied it, or - until escalation exists - decided
+         *     to escalate it), error.
          *     Rail calls: ok, not_found (a lookup found nothing), rejected (a clear
          *     no), ambiguous (outcome unclear: timeout, 5xx, network),
          *     duplicate_transfers, error, in_progress (under way), interrupted
          *     (started but never finished - the worker likely died mid-call).
          * @enum {string}
          */
-        AttemptOutcome: "started" | "attached" | "deduplicated" | "invalid" | "payee_unknown" | "error" | "ok" | "not_found" | "rejected" | "ambiguous" | "duplicate_transfers" | "in_progress" | "interrupted";
+        AttemptOutcome: "started" | "attached" | "deduplicated" | "invalid" | "payee_unknown" | "policy_denied" | "error" | "ok" | "not_found" | "rejected" | "ambiguous" | "duplicate_transfers" | "in_progress" | "interrupted";
         Attempt: {
             id: string;
             kind: components["schemas"]["AttemptKind"];
@@ -2131,6 +2246,75 @@ export interface components {
          *     exactly. Trimmed; no spaces or control characters inside.
          */
         ExternalID: string;
+        /** @description One currency's limits within a policy version. Zero means unlimited on every field - there is no policy that blocks every payment in a currency while still naming a rule for it. */
+        CurrencyRule: {
+            /** @enum {string} */
+            currency: "USD" | "EUR" | "GBP";
+            /** Format: int64 */
+            max_transaction_minor: number;
+            /** Format: int64 */
+            max_24h_minor: number;
+            /** Format: int64 */
+            max_7d_minor: number;
+            /** Format: int64 */
+            max_30d_minor: number;
+            max_per_hour_count: number;
+            /**
+             * Format: int64
+             * @description Above this, a payment or checkout escalates for a human's approval.
+             */
+            approval_threshold_minor: number;
+        };
+        PolicyVersion: {
+            /** @description 0 means the organisation has never edited its policy - every limit is unlimited. */
+            version: number;
+            currency_rules: components["schemas"]["CurrencyRule"][];
+            /** @description Treasury only. Empty means no allow-list restriction. */
+            payee_allow: string[];
+            /** @description Treasury only. */
+            payee_block: string[];
+            /** @description Commerce only. */
+            category_block: string[];
+            /**
+             * Format: date-time
+             * @description Null for the default, unedited version.
+             */
+            created_at: string | null;
+            /** @description The user who saved this version. Omitted for the default, unedited version. */
+            created_by?: string;
+        };
+        UpdatePolicyRequest: {
+            /** @description An omitted currency defaults to unlimited on every field. */
+            currency_rules?: components["schemas"]["CurrencyRule"][];
+            payee_allow?: string[];
+            payee_block?: string[];
+            category_block?: string[];
+        };
+        DryRunPolicyRequest: {
+            /** @enum {string} */
+            context: "treasury" | "commerce";
+            /** @enum {string} */
+            currency: "USD" | "EUR" | "GBP";
+            /** Format: int64 */
+            amount_minor: number;
+            /** @description Treasury only. */
+            payee?: string;
+            /** @description Commerce only. */
+            categories?: string[];
+        };
+        PolicyDecision: {
+            /**
+             * @description Deny beats escalate - escalate is only reached when nothing already denied.
+             * @enum {string}
+             */
+            outcome: "allow" | "deny" | "escalate";
+            reasons: {
+                /** @enum {string} */
+                code: "over_transaction_limit" | "over_24h_total" | "over_7d_total" | "over_30d_total" | "over_hourly_count" | "payee_blocked" | "payee_not_allowed" | "category_blocked" | "no_currency_rule" | "over_approval_threshold";
+                detail: string;
+            }[];
+            policy_version: number;
+        };
         MerchantIntegration: {
             id: string;
             name: string;
@@ -2319,8 +2503,14 @@ export interface components {
                 allowed: boolean;
                 /** @description Every reason a `denied` checkout falls outside its mandate. */
                 reasons: {
-                    /** @enum {string} */
-                    code: "mandate_not_active" | "customer_mismatch" | "agent_mismatch" | "funding_method_mismatch" | "currency_mismatch" | "over_transaction_limit" | "category_not_allowed" | "over_transaction_count" | "over_budget";
+                    /**
+                     * @description A mandate-level reason (the customer's own consent doesn't
+                     *     allow this), or a policy_-prefixed one (the organisation's
+                     *     spending policy doesn't, decided before the mandate is ever
+                     *     evaluated - the two never appear together in one checkout).
+                     * @enum {string}
+                     */
+                    code: "mandate_not_active" | "customer_mismatch" | "agent_mismatch" | "funding_method_mismatch" | "currency_mismatch" | "over_transaction_limit" | "category_not_allowed" | "over_transaction_count" | "over_budget" | "policy_over_transaction_limit" | "policy_over_24h_total" | "policy_over_7d_total" | "policy_over_30d_total" | "policy_over_hourly_count" | "policy_payee_blocked" | "policy_payee_not_allowed" | "policy_category_blocked" | "policy_no_currency_rule" | "policy_over_approval_threshold";
                     detail: string;
                 }[];
             };
@@ -2559,15 +2749,19 @@ export interface components {
         /**
          * @description Where an intent is in its lifecycle. APPLIED and BLOCKED are final.
          *     - PROPOSED: received by the workflow.
+         *     - AWAITING_APPROVAL: the organisation's policy escalated it, above
+         *       the approval threshold; an owner or admin must approve or reject
+         *       it within 24 hours, or it is denied.
          *     - AUTHORIZED: policy passed.
          *     - IN_FLIGHT: recorded, then sent to the rail.
          *     - UNKNOWN: the outcome is unclear; Enquoir looks it up before anything else.
          *     - APPLIED: the rail confirmed the transfer PAID.
          *     - FAILED: the rail rejected or cancelled it.
-         *     - BLOCKED: policy refused it; the rail was never called.
+         *     - BLOCKED: policy refused it, or an escalation was rejected or
+         *       expired; the rail was never called.
          * @enum {string}
          */
-        State: "PROPOSED" | "AUTHORIZED" | "IN_FLIGHT" | "UNKNOWN" | "APPLIED" | "FAILED" | "BLOCKED";
+        State: "PROPOSED" | "AWAITING_APPROVAL" | "AUTHORIZED" | "IN_FLIGHT" | "UNKNOWN" | "APPLIED" | "FAILED" | "BLOCKED";
         SubmitIntentRequest: {
             /**
              * @description The beneficiary ID returned by POST /v1/beneficiaries. It must be a
@@ -3951,6 +4145,84 @@ export interface operations {
             401: components["responses"]["Unauthenticated"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    getCurrentPolicy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The current policy version. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyVersion"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    updatePolicy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePolicyRequest"];
+            };
+        };
+        responses: {
+            /** @description The saved version. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyVersion"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    dryRunPolicy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DryRunPolicyRequest"];
+            };
+        };
+        responses: {
+            /** @description The decision. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyDecision"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
             500: components["responses"]["InternalError"];
         };
     };
@@ -5534,6 +5806,82 @@ export interface operations {
             401: components["responses"]["Unauthenticated"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    approveEscalatedPayment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The intent key returned on submission. */
+                key: components["parameters"]["IntentKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Approved; the payment proceeds (or is denied on recheck). */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthenticated"];
+            /** @description Forbidden, or the acting user is excluded from approving. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+            /** @description The payment is not currently awaiting approval. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            500: components["responses"]["InternalError"];
+        };
+    };
+    rejectEscalatedPayment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The intent key returned on submission. */
+                key: components["parameters"]["IntentKey"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Rejected; the payment is denied. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            /** @description The payment is not currently awaiting approval. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             500: components["responses"]["InternalError"];
         };
     };
