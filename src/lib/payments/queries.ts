@@ -1,6 +1,6 @@
 "use client";
 
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, unwrap } from "@/lib/api/client";
 import { nextCursorParam } from "@/lib/api/pagination";
 import type { components } from "@/lib/api/schema";
@@ -62,5 +62,39 @@ export function useReplay(key: string) {
     queryKey: ["payment", key, "replay"],
     queryFn: () =>
       unwrap(api.GET("/v1/payments/{key}/replay", { params: { path: { key } } })),
+  });
+}
+
+/**
+ * Approve/reject resolve a payment the organisation's policy escalated
+ * (AWAITING_APPROVAL). The backend re-decides asynchronously (the
+ * workflow re-checks the policy, or waits for the timeout) - this
+ * refetches the payment and every open payments list so they pick up
+ * the outcome once it lands, not synchronously on this response.
+ * `exact: true` on the detail key keeps that from also invalidating
+ * its replay data (["payment", key, "replay"]), which this doesn't
+ * change.
+ */
+export function useApproveEscalatedPayment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (key: string) =>
+      unwrap(api.POST("/v1/payments/{key}/approve", { params: { path: { key } } })),
+    onSuccess: (_data, key) => {
+      queryClient.invalidateQueries({ queryKey: ["payment", key], exact: true });
+      queryClient.invalidateQueries({ queryKey: ["payments"] });
+    },
+  });
+}
+
+export function useRejectEscalatedPayment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (key: string) =>
+      unwrap(api.POST("/v1/payments/{key}/reject", { params: { path: { key } } })),
+    onSuccess: (_data, key) => {
+      queryClient.invalidateQueries({ queryKey: ["payment", key], exact: true });
+      queryClient.invalidateQueries({ queryKey: ["payments"] });
+    },
   });
 }
