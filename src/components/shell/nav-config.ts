@@ -7,6 +7,7 @@ import {
   Bot,
   Store,
   Landmark,
+  ShieldAlert,
   Users,
   Mail,
   ScrollText,
@@ -43,6 +44,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: "Agents", href: "/agents", icon: Bot },
       { label: "Merchant integrations", href: "/merchants", icon: Store },
       { label: "Beneficiaries", href: "/beneficiaries", icon: Landmark },
+      { label: "Spending policy", href: "/policy", icon: ShieldAlert },
     ],
   },
   {
