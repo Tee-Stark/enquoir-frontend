@@ -12,17 +12,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import type { IssuedAgent } from "@/lib/agents/queries";
 
 /**
- * Shared by create and rotate - both issue a secret that the backend shows
- * exactly once and never again, so both need the same "copy it now" dialog.
+ * Shared by every "create" or "rotate" flow that issues a secret the
+ * backend shows exactly once and never again (agent API keys, merchant
+ * integration keys, ...) - one "copy it now" dialog instead of one per
+ * resource type.
  */
-export function RevealApiKeyDialog({
+export function RevealSecretDialog({
   issued,
   onClose,
 }: {
-  issued: IssuedAgent | null;
+  issued: { title: string; secret: string } | null;
   onClose: () => void;
 }) {
   const [copied, setCopied] = useState(false);
@@ -30,7 +31,7 @@ export function RevealApiKeyDialog({
   const copy = async () => {
     if (!issued) return;
     try {
-      await navigator.clipboard.writeText(issued.api_key.secret);
+      await navigator.clipboard.writeText(issued.secret);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -45,7 +46,7 @@ export function RevealApiKeyDialog({
     <Dialog open={issued !== null} onOpenChange={(open) => !open && onClose()}>
       <DialogContent showCloseButton={false}>
         <DialogHeader>
-          <DialogTitle>{issued?.agent.name} — API key</DialogTitle>
+          <DialogTitle>{issued?.title}</DialogTitle>
           <DialogDescription>
             Shown once. Enquoir stores only its hash — copy it now, there&apos;s
             no way to see it again.
@@ -53,7 +54,7 @@ export function RevealApiKeyDialog({
         </DialogHeader>
         <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2">
           <code className="flex-1 overflow-x-auto font-mono text-xs text-foreground">
-            {issued?.api_key.secret}
+            {issued?.secret}
           </code>
           <Button type="button" variant="ghost" size="icon-sm" onClick={copy}>
             {copied ? (

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { toast } from "sonner";
 import { ArrowLeft, FileSearch, History } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -19,8 +20,11 @@ import { StateProgression } from "@/components/payments/state-progression";
 import { HashChainBadge } from "@/components/payments/hash-chain-badge";
 import { EventHistory } from "@/components/payments/event-history";
 import { AttemptsTable } from "@/components/payments/attempts-table";
-import { isApiError } from "@/lib/api/client";
-import { usePayment } from "@/lib/payments/queries";
+import { DecisionActions } from "@/components/consent/decision-actions";
+import { RefreshButton } from "@/components/shared/refresh-button";
+import { isApiError, problemMessage } from "@/lib/api/client";
+import { useSession } from "@/lib/auth/session";
+import { usePayment, useApproveEscalatedPayment, useRejectEscalatedPayment } from "@/lib/payments/queries";
 
 function SummaryRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -32,7 +36,10 @@ function SummaryRow({ label, children }: { label: string; children: React.ReactN
 }
 
 export function PaymentDetailView({ paymentKey }: { paymentKey: string }) {
-  const { data: payment, isPending, isError, error, refetch } = usePayment(paymentKey);
+  const { data: payment, isPending, isFetching, isError, error, refetch } = usePayment(paymentKey);
+  const session = useSession();
+  const approve = useApproveEscalatedPayment();
+  const reject = useRejectEscalatedPayment();
 
   if (isPending) {
     return <Skeleton className="h-96 w-full" />;
@@ -72,9 +79,12 @@ export function PaymentDetailView({ paymentKey }: { paymentKey: string }) {
             </h1>
             <PaymentStateBadge state={payment.state} />
           </div>
-          <Link href={`/payments/${payment.key}/replay`} className={buttonVariants({ variant: "outline", size: "sm" })}>
-            <History className="size-3.5" /> Replay
-          </Link>
+          <div className="flex items-center gap-2">
+            <RefreshButton onRefresh={() => refetch()} isRefreshing={isFetching} />
+            <Link href={`/payments/${payment.key}/replay`} className={buttonVariants({ variant: "outline", size: "sm" })}>
+              <History className="size-3.5" /> Replay
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -95,6 +105,9 @@ export function PaymentDetailView({ paymentKey }: { paymentKey: string }) {
           <SummaryRow label="Transfer ID">
             <span className="font-mono text-xs">{payment.transfer_id ?? "—"}</span>
           </SummaryRow>
+          {payment.policy_version !== null && (
+            <SummaryRow label="Policy version">v{payment.policy_version}</SummaryRow>
+          )}
           <SummaryRow label="Submissions">{payment.submissions}</SummaryRow>
           <SummaryRow label="Rail calls">{payment.rail_calls}</SummaryRow>
           {payment.failure_reason && (
@@ -108,6 +121,10 @@ export function PaymentDetailView({ paymentKey }: { paymentKey: string }) {
           </SummaryRow>
         </CardContent>
       </Card>
+
+      {payment.state === "AWAITING_APPROVAL" && (
+        <EscalationCard paymentKey={payment.key} session={session.data} approve={approve} reject={reject} />
+      )}
 
       <Card>
         <CardHeader>
@@ -149,5 +166,77 @@ export function PaymentDetailView({ paymentKey }: { paymentKey: string }) {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+/**
+ * Only rendered while the payment is AWAITING_APPROVAL. Approving
+ * needs a verified email (like every other credential-shaping/
+ * money-moving action); rejecting doesn't, matching the backend's own
+ * rule that cutting a payment off is always allowed. The creator-
+ * exclusion rule (can't approve your own agent's payment unless
+ * you're the only eligible approver) is enforced server-side only -
+ * this never guesses it client-side, just surfaces the 403
+ * approver_excluded if it applies.
+ */
+function EscalationCard({
+  paymentKey,
+  session,
+  approve,
+  reject,
+}: {
+  paymentKey: string;
+  session?: { role: string; user: { email_verified: boolean } };
+  approve: ReturnType<typeof useApproveEscalatedPayment>;
+  reject: ReturnType<typeof useRejectEscalatedPayment>;
+}) {
+  const canDecide = session?.role === "owner" || session?.role === "admin";
+  const canApprove = canDecide && session?.user.email_verified === true;
+
+  return (
+    <Card className="border-warning/30 bg-warning/5">
+      <CardHeader>
+        <CardTitle className="text-base">Awaiting your approval</CardTitle>
+        <CardDescription>
+          This payment is over the organisation&apos;s spending policy threshold. Approving rechecks
+          the policy before it proceeds - a decision that was fine when escalated can still be
+          refused now. It will be denied automatically after 24 hours with no decision.
+        </CardDescription>
+      </CardHeader>
+      {canDecide && (
+        <CardContent>
+          {canApprove ? (
+            <DecisionActions
+              primary={{
+                label: approve.isPending ? "Approving…" : "Approve",
+                pending: approve.isPending,
+                onClick: () =>
+                  approve.mutate(paymentKey, { onError: (err) => toast.error(problemMessage(err)) }),
+              }}
+              secondary={{
+                label: reject.isPending ? "Rejecting…" : "Reject",
+                pending: reject.isPending,
+                onClick: () =>
+                  reject.mutate(paymentKey, { onError: (err) => toast.error(problemMessage(err)) }),
+              }}
+            />
+          ) : (
+            <>
+              <DecisionActions
+                primary={{
+                  label: reject.isPending ? "Rejecting…" : "Reject",
+                  pending: reject.isPending,
+                  onClick: () =>
+                    reject.mutate(paymentKey, { onError: (err) => toast.error(problemMessage(err)) }),
+                }}
+              />
+              <p className="mt-2 text-xs text-muted-foreground">
+                Verify your email to approve this payment. You can still reject it.
+              </p>
+            </>
+          )}
+        </CardContent>
+      )}
+    </Card>
   );
 }

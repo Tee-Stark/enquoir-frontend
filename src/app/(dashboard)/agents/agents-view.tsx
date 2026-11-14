@@ -18,7 +18,8 @@ import { ErrorState } from "@/components/feedback/error-state";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { CreateAgentDialog } from "@/components/agents/create-agent-dialog";
-import { RevealApiKeyDialog } from "@/components/agents/reveal-api-key-dialog";
+import { RevealSecretDialog } from "@/components/shared/reveal-secret-dialog";
+import { RefreshButton } from "@/components/shared/refresh-button";
 import { problemMessage } from "@/lib/api/client";
 import { useSession } from "@/lib/auth/session";
 import {
@@ -29,7 +30,7 @@ import {
 } from "@/lib/agents/queries";
 
 export function AgentsView() {
-  const { data, isPending, isError, error, refetch } = useAgents();
+  const { data, isPending, isFetching, isError, error, refetch } = useAgents();
   const session = useSession();
   const rotateKey = useRotateAgentKey();
   const revokeAgent = useRevokeAgent();
@@ -49,7 +50,10 @@ export function AgentsView() {
           title="Agents"
           description="The AI agents that can submit payments on this organisation's behalf, and their API keys."
         />
-        <CreateAgentDialog disabled={!canCreate} />
+        <div className="flex items-center gap-2">
+          <RefreshButton onRefresh={() => refetch()} isRefreshing={isFetching} />
+          <CreateAgentDialog disabled={!canCreate} />
+        </div>
       </div>
 
       {isPending && <Skeleton className="h-64 w-full" />}
@@ -144,7 +148,10 @@ export function AgentsView() {
         </Card>
       )}
 
-      <RevealApiKeyDialog issued={rotated} onClose={() => setRotated(null)} />
+      <RevealSecretDialog
+        issued={rotated && { title: `${rotated.agent.name} — API key`, secret: rotated.api_key.secret }}
+        onClose={() => setRotated(null)}
+      />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/feedback/error-state";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { RefreshButton } from "@/components/shared/refresh-button";
 import {
   AnalyticsFilters,
   DEFAULT_FILTERS,
@@ -26,11 +27,22 @@ export function AnalyticsView() {
   const timeToApplied = useAnalyticsTimeSeries({ metric: "time_to_applied", from, to, tz });
 
   const isPending = payments.isPending || volume.isPending || timeToApplied.isPending;
+  const isFetching = payments.isFetching || volume.isFetching || timeToApplied.isFetching;
   const firstError = payments.error ?? volume.error ?? timeToApplied.error;
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="Analytics" description="Trends over time, across every currency and state." />
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <PageHeader title="Analytics" description="Trends over time, across every currency and state." />
+        <RefreshButton
+          onRefresh={() => {
+            payments.refetch();
+            volume.refetch();
+            timeToApplied.refetch();
+          }}
+          isRefreshing={isFetching}
+        />
+      </div>
 
       <AnalyticsFilters value={filterForm} onChange={setFilterForm} />
 

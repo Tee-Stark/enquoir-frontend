@@ -16,7 +16,7 @@ import {
 import { FormField } from "@/components/form/form-field";
 import { FormError } from "@/components/form/form-error";
 import { useCreateAgent, type IssuedAgent } from "@/lib/agents/queries";
-import { RevealApiKeyDialog } from "./reveal-api-key-dialog";
+import { RevealSecretDialog } from "@/components/shared/reveal-secret-dialog";
 
 export function CreateAgentDialog({ disabled }: { disabled?: boolean }) {
   const [open, setOpen] = useState(false);
@@ -73,7 +73,10 @@ export function CreateAgentDialog({ disabled }: { disabled?: boolean }) {
           </form>
         </DialogContent>
       </Dialog>
-      <RevealApiKeyDialog issued={issued} onClose={() => setIssued(null)} />
+      <RevealSecretDialog
+        issued={issued && { title: `${issued.agent.name} — API key`, secret: issued.api_key.secret }}
+        onClose={() => setIssued(null)}
+      />
     </>
   );
 }

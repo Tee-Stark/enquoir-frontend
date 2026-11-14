@@ -94,6 +94,11 @@ export const PROBLEM_MESSAGES: Partial<Record<ProblemCode, string>> = {
   not_implemented: "This isn't available yet.",
   internal_error: "Something went wrong on our side. It's safe to try again.",
   unauthenticated: "Please sign in to continue.",
+  terms_mismatch: "These terms have changed since you opened this link. Refresh and review them again.",
+  checkout_mismatch: "This isn't the checkout the link was for.",
+  policy_denied: "This exceeds the organisation's spending policy.",
+  not_awaiting_approval: "This payment is no longer awaiting approval.",
+  approver_excluded: "You created this payment's agent, and another owner or admin can approve it instead - they need to decide this one.",
 };
 
 function formatRetryAfter(seconds: number): string {

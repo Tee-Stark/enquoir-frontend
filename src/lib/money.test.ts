@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { formatMinorUnits, formatMoney, type Money } from "./money";
+import {
+  formatMinorUnits,
+  formatMoney,
+  minorUnitsToMajorInput,
+  parseMajorUnitsInput,
+  type Money,
+} from "./money";
 
 function money(overrides: Partial<Money>): Money {
   return { minor_units: 1050, currency: "USD", amount: "10.50", ...overrides };
@@ -41,5 +47,45 @@ describe("formatMinorUnits", () => {
     // 1 minor unit = $0.01 exactly; nothing here should introduce floating-point drift.
     expect(formatMinorUnits(1, "USD")).toBe("$0.01");
     expect(formatMinorUnits(333, "USD")).toBe("$3.33");
+  });
+});
+
+describe("minorUnitsToMajorInput", () => {
+  it("renders 0 (unlimited) as an empty string, not 0.00", () => {
+    expect(minorUnitsToMajorInput(0)).toBe("");
+  });
+
+  it("round-trips with parseMajorUnitsInput", () => {
+    for (const minor of [1, 10, 100, 1999, 50000]) {
+      expect(parseMajorUnitsInput(minorUnitsToMajorInput(minor))).toBe(minor);
+    }
+  });
+});
+
+describe("parseMajorUnitsInput", () => {
+  it("parses whole and fractional amounts into minor units", () => {
+    expect(parseMajorUnitsInput("500")).toBe(50000);
+    expect(parseMajorUnitsInput("19.99")).toBe(1999);
+    expect(parseMajorUnitsInput("0.01")).toBe(1);
+    expect(parseMajorUnitsInput("0.1")).toBe(10);
+  });
+
+  it("treats blank or zero as unlimited (0)", () => {
+    expect(parseMajorUnitsInput("")).toBe(0);
+    expect(parseMajorUnitsInput("  ")).toBe(0);
+    expect(parseMajorUnitsInput("0")).toBe(0);
+  });
+
+  it("rejects anything that isn't a plain decimal amount", () => {
+    expect(parseMajorUnitsInput("abc")).toBeNull();
+    expect(parseMajorUnitsInput("-5")).toBeNull();
+    expect(parseMajorUnitsInput("5.999")).toBeNull();
+    expect(parseMajorUnitsInput("5,000")).toBeNull();
+  });
+
+  it("never drifts the way a bare Number(x) * 100 would", () => {
+    // 19.99 * 100 === 1998.9999999999998 in IEEE 754 - this must not.
+    expect(parseMajorUnitsInput("19.99")).toBe(1999);
+    expect(parseMajorUnitsInput("29.99")).toBe(2999);
   });
 });

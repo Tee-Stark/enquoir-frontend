@@ -7,6 +7,7 @@ describe("PaymentStateBadge", () => {
     const states: PaymentState[] = [
       "RECEIVED",
       "PROPOSED",
+      "AWAITING_APPROVAL",
       "AUTHORIZED",
       "IN_FLIGHT",
       "UNKNOWN",
@@ -20,6 +21,7 @@ describe("PaymentStateBadge", () => {
     }
 
     expect(screen.getByText("Received")).toBeInTheDocument();
+    expect(screen.getByText("Awaiting approval")).toBeInTheDocument();
     expect(screen.getByText("Applied")).toBeInTheDocument();
     expect(screen.getByText("Failed")).toBeInTheDocument();
     expect(screen.getByText("Blocked")).toBeInTheDocument();

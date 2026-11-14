@@ -3,6 +3,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/feedback/error-state";
 import { PageHeader } from "@/components/page-header";
+import { RefreshButton } from "@/components/shared/refresh-button";
 import { MetricCard } from "@/components/overview/metric-card";
 import { VolumeByCurrency } from "@/components/overview/volume-by-currency";
 import { RecentPayments } from "@/components/overview/recent-payments";
@@ -29,10 +30,19 @@ export function OverviewView() {
 
   return (
     <div className="flex flex-col gap-8">
-      <PageHeader
-        title="Overview"
-        description={`Last 30 days (${period.tz}). Here's your organisation's activity.`}
-      />
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <PageHeader
+          title="Overview"
+          description={`Last 30 days (${period.tz}). Here's your organisation's activity.`}
+        />
+        <RefreshButton
+          onRefresh={() => {
+            summary.refetch();
+            recent.refetch();
+          }}
+          isRefreshing={summary.isFetching || recent.isFetching}
+        />
+      </div>
 
       <section className="flex flex-col gap-3">
         <SectionLabel>Key metrics</SectionLabel>
@@ -53,6 +63,11 @@ export function OverviewView() {
         <SectionLabel>Operational</SectionLabel>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           <MetricCard label="In progress" value={payments.in_progress} tone="warning" />
+          <MetricCard
+            label="Awaiting approval"
+            value={payments.by_state.AWAITING_APPROVAL ?? 0}
+            tone="warning"
+          />
           <MetricCard label="Failed" value={payments.by_state.FAILED ?? 0} tone="destructive" />
           <MetricCard label="Active agents" value={submissions.active_agents} />
           <MetricCard label="Total submissions" value={submissions.total} />

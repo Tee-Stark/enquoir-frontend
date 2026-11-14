@@ -16,6 +16,7 @@ import {
 import { ErrorState } from "@/components/feedback/error-state";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { RefreshButton } from "@/components/shared/refresh-button";
 import {
   AuditLogFiltersBar,
   EMPTY_FILTERS,
@@ -45,17 +46,20 @@ export function AuditLogView() {
   const [filterForm, setFilterForm] = useState<FilterFormState>(EMPTY_FILTERS);
   const filters = toApiFilters(filterForm);
 
-  const { data, isPending, isError, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  const { data, isPending, isFetching, isError, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useAuditLog(filters);
 
   const events = data?.pages.flatMap((page) => page.data) ?? [];
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader
-        title="Audit log"
-        description="What happened in this organisation, by whom, and when."
-      />
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <PageHeader
+          title="Audit log"
+          description="What happened in this organisation, by whom, and when."
+        />
+        <RefreshButton onRefresh={() => refetch()} isRefreshing={isFetching} />
+      </div>
 
       <AuditLogFiltersBar value={filterForm} onChange={setFilterForm} />
 
