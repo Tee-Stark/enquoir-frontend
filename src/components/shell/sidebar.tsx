@@ -28,7 +28,7 @@ export function Sidebar() {
           collapsed ? "justify-center" : "justify-between gap-2"
         )}
       >
-        {!collapsed && <Wordmark collapsed={collapsed} />}
+        <Wordmark collapsed={collapsed} />
         <Button
           variant="ghost"
           size="icon-sm"
