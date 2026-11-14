@@ -16,7 +16,6 @@ export function Wordmark({
         width={28}
         height={28}
         className="size-7 shrink-0 object-contain"
-        priority
       />
       {!collapsed && (
         <span className="text-[15px] font-semibold tracking-tight text-sidebar-foreground">

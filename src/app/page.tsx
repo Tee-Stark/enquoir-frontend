@@ -68,9 +68,9 @@ export default function LandingPage() {
               {capabilities.map(({ icon: Icon, title, description }) => (
                 <div key={title} className="flex flex-col gap-3">
                   <Icon aria-hidden className="size-5 text-primary" />
-                  <h3 className="text-base font-semibold text-foreground">
+                  <h2 className="text-base font-semibold text-foreground">
                     {title}
-                  </h3>
+                  </h2>
                   <p className="text-sm text-muted-foreground">
                     {description}
                   </p>
