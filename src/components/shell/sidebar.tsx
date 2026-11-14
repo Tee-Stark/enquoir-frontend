@@ -24,8 +24,10 @@ export function Sidebar() {
     >
       <div
         className={cn(
-          "flex h-14 items-center border-b border-sidebar-border px-3",
-          collapsed ? "justify-center" : "justify-between gap-2"
+          "flex items-center border-b border-sidebar-border",
+          collapsed
+            ? "h-24 flex-col justify-center gap-2"
+            : "h-14 justify-between gap-2 px-3"
         )}
       >
         <Wordmark collapsed={collapsed} />

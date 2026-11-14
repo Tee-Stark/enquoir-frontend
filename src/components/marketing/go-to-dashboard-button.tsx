@@ -18,10 +18,9 @@ import { cn } from "@/lib/utils";
 /**
  * The landing page's one CTA, reused in the nav, hero and closing section.
  * It starts fetching the session as soon as it mounts (useSession is cached
- * app-wide by TanStack Query), so by the time someone actually clicks it
- * almost always already knows whether to go straight to the dashboard or
- * offer the sign-up/log-in choice instead - never the dashboard's own
- * auth error.
+ * app-wide by TanStack Query). Disabled while that's still pending, so a
+ * signed-in visitor can't be shown the sign-up/log-in dialog just because
+ * they clicked before the session resolved.
  */
 export function GoToDashboardButton({
   size = "lg",
@@ -29,7 +28,7 @@ export function GoToDashboardButton({
   className,
 }: Pick<React.ComponentProps<typeof Button>, "size" | "variant" | "className">) {
   const router = useRouter();
-  const { data, isError } = useSession();
+  const { data, isPending, isError } = useSession();
   const [choiceOpen, setChoiceOpen] = useState(false);
   const authenticated = Boolean(data) && !isError;
 
@@ -39,6 +38,7 @@ export function GoToDashboardButton({
         size={size}
         variant={variant}
         className={className}
+        disabled={isPending}
         onClick={() => {
           if (authenticated) {
             router.push("/dashboard");
@@ -47,7 +47,7 @@ export function GoToDashboardButton({
           }
         }}
       >
-        Go to dashboard
+        {isPending ? "Loading…" : "Go to dashboard"}
       </Button>
       <Dialog open={choiceOpen} onOpenChange={setChoiceOpen}>
         <DialogContent>
