@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 export function Wordmark({
@@ -9,9 +10,14 @@ export function Wordmark({
 }) {
   return (
     <div className={cn("flex items-center gap-2", className)}>
-      <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground shadow-[0_0_0_1px_rgba(255,255,255,0.08)]">
-        E
-      </span>
+      <Image
+        src="/brand/enquoir-mark.png"
+        alt=""
+        width={28}
+        height={28}
+        className="size-7 shrink-0 object-contain"
+        priority
+      />
       {!collapsed && (
         <span className="text-[15px] font-semibold tracking-tight text-sidebar-foreground">
           Enquoir
