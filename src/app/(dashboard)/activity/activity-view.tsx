@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { ErrorState } from "@/components/feedback/error-state";
 import { PageHeader } from "@/components/page-header";
+import { RefreshButton } from "@/components/shared/refresh-button";
 import {
   AttemptsFilters,
   EMPTY_FILTERS,
@@ -23,17 +24,20 @@ export function ActivityView() {
   const debouncedIntentKey = useDebouncedValue(filterForm.intentKey);
   const filters = toApiFilters({ ...filterForm, intentKey: debouncedIntentKey });
 
-  const { data, isPending, isError, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  const { data, isPending, isFetching, isError, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useAttempts(filters);
 
   const attempts = data?.pages.flatMap((page) => page.data) ?? [];
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader
-        title="Activity"
-        description="Every agent submission and Airwallex call, newest first."
-      />
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <PageHeader
+          title="Activity"
+          description="Every agent submission and Airwallex call, newest first."
+        />
+        <RefreshButton onRefresh={() => refetch()} isRefreshing={isFetching} />
+      </div>
 
       <AttemptsFilters value={filterForm} onChange={setFilterForm} />
 

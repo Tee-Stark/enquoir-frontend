@@ -11,6 +11,7 @@ import { ErrorState } from "@/components/feedback/error-state";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { RevealSecretDialog } from "@/components/shared/reveal-secret-dialog";
 import { ConfirmButton } from "@/components/shared/confirm-button";
+import { RefreshButton } from "@/components/shared/refresh-button";
 import { IntegrationCheckoutsSection } from "@/components/merchants/integration-checkouts-section";
 import { IntegrationMandatesSection } from "@/components/merchants/integration-mandates-section";
 import { IntegrationExecutionsSection } from "@/components/merchants/integration-executions-section";
@@ -35,7 +36,7 @@ function SummaryRow({ label, children }: { label: string; children: React.ReactN
 }
 
 export function MerchantDetailView({ integrationId }: { integrationId: string }) {
-  const { data: integration, isPending, isError, error, refetch } = useMerchantIntegration(integrationId);
+  const { data: integration, isPending, isFetching, isError, error, refetch } = useMerchantIntegration(integrationId);
   const session = useSession();
   const disable = useDisableMerchantIntegration();
   const enable = useEnableMerchantIntegration();
@@ -79,16 +80,19 @@ export function MerchantDetailView({ integrationId }: { integrationId: string })
           <ArrowLeft className="size-3.5" /> Merchant integrations
         </Link>
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-lg font-semibold tracking-tight text-foreground">{integration.name}</h1>
-          <span
-            className={
-              integration.status === "active"
-                ? "inline-flex h-5 items-center rounded-4xl bg-success/15 px-2 text-xs font-medium text-success"
-                : "inline-flex h-5 items-center rounded-4xl bg-neutral-state/15 px-2 text-xs font-medium text-neutral-state"
-            }
-          >
-            {integration.status === "active" ? "Active" : "Disabled"}
-          </span>
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-lg font-semibold tracking-tight text-foreground">{integration.name}</h1>
+            <span
+              className={
+                integration.status === "active"
+                  ? "inline-flex h-5 items-center rounded-4xl bg-success/15 px-2 text-xs font-medium text-success"
+                  : "inline-flex h-5 items-center rounded-4xl bg-neutral-state/15 px-2 text-xs font-medium text-neutral-state"
+              }
+            >
+              {integration.status === "active" ? "Active" : "Disabled"}
+            </span>
+          </div>
+          <RefreshButton onRefresh={() => refetch()} isRefreshing={isFetching} />
         </div>
       </div>
 

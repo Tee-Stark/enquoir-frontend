@@ -16,6 +16,7 @@ import {
 import { ErrorState } from "@/components/feedback/error-state";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { RefreshButton } from "@/components/shared/refresh-button";
 import { InviteMemberDialog } from "@/components/invitations/invite-member-dialog";
 import { problemMessage } from "@/lib/api/client";
 import { useSession } from "@/lib/auth/session";
@@ -24,7 +25,7 @@ import { ROLE_LABEL, canManageMembers, selectableRoles } from "@/lib/members/rol
 import { useInvitations, useRevokeInvitation } from "@/lib/invitations/queries";
 
 export function InvitationsView() {
-  const { data, isPending, isError, error, refetch } = useInvitations();
+  const { data, isPending, isFetching, isError, error, refetch } = useInvitations();
   const session = useSession();
   const members = useMembers();
   const revokeInvitation = useRevokeInvitation();
@@ -45,9 +46,12 @@ export function InvitationsView() {
           title="Invitations"
           description="Pending invitations by email, with assigned role."
         />
-        {canManageMembers(viewerRole) && (
-          <InviteMemberDialog disabled={!canInvite} invitableRoles={invitableRoles} />
-        )}
+        <div className="flex items-center gap-2">
+          <RefreshButton onRefresh={() => refetch()} isRefreshing={isFetching} />
+          {canManageMembers(viewerRole) && (
+            <InviteMemberDialog disabled={!canInvite} invitableRoles={invitableRoles} />
+          )}
+        </div>
       </div>
 
       {isPending && <Skeleton className="h-64 w-full" />}

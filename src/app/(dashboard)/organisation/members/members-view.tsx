@@ -24,13 +24,14 @@ import {
 import { ErrorState } from "@/components/feedback/error-state";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { PageHeader } from "@/components/page-header";
+import { RefreshButton } from "@/components/shared/refresh-button";
 import { problemMessage } from "@/lib/api/client";
 import { useSession } from "@/lib/auth/session";
 import { useChangeMemberRole, useMembers, useRemoveMember, type Role } from "@/lib/members/queries";
 import { ROLE_LABEL, canEditMemberWithRole, selectableRoles } from "@/lib/members/roles";
 
 export function MembersView() {
-  const { data, isPending, isError, error, refetch } = useMembers();
+  const { data, isPending, isFetching, isError, error, refetch } = useMembers();
   const session = useSession();
   const changeRole = useChangeMemberRole();
   const removeMember = useRemoveMember();
@@ -44,10 +45,13 @@ export function MembersView() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader
-        title="Members"
-        description="The people in this organisation, their roles, and role changes."
-      />
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <PageHeader
+          title="Members"
+          description="The people in this organisation, their roles, and role changes."
+        />
+        <RefreshButton onRefresh={() => refetch()} isRefreshing={isFetching} />
+      </div>
 
       {isPending && <Skeleton className="h-64 w-full" />}
       {isError && <ErrorState error={error} onRetry={refetch} />}

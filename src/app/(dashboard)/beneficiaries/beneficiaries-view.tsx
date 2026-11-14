@@ -15,11 +15,12 @@ import { ErrorState } from "@/components/feedback/error-state";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { RegisterBeneficiaryDialog } from "@/components/beneficiaries/register-beneficiary-dialog";
+import { RefreshButton } from "@/components/shared/refresh-button";
 import { useSession } from "@/lib/auth/session";
 import { useBeneficiaries } from "@/lib/beneficiaries/queries";
 
 export function BeneficiariesView() {
-  const { data, isPending, isError, error, refetch } = useBeneficiaries();
+  const { data, isPending, isFetching, isError, error, refetch } = useBeneficiaries();
   const session = useSession();
 
   const beneficiaries = data?.data ?? [];
@@ -37,7 +38,10 @@ export function BeneficiariesView() {
           title="Beneficiaries"
           description="Payees registered on the rail before they can be paid."
         />
-        <RegisterBeneficiaryDialog disabled={!canRegister} />
+        <div className="flex items-center gap-2">
+          <RefreshButton onRefresh={() => refetch()} isRefreshing={isFetching} />
+          <RegisterBeneficiaryDialog disabled={!canRegister} />
+        </div>
       </div>
 
       {isPending && <Skeleton className="h-64 w-full" />}

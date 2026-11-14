@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { ErrorState } from "@/components/feedback/error-state";
 import { PageHeader } from "@/components/page-header";
+import { RefreshButton } from "@/components/shared/refresh-button";
 import {
   EMPTY_FILTERS,
   PaymentsFilters,
@@ -23,14 +24,17 @@ export function PaymentsView() {
   const debouncedReference = useDebouncedValue(filterForm.reference);
   const filters = toApiFilters({ ...filterForm, reference: debouncedReference });
 
-  const { data, isPending, isError, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  const { data, isPending, isFetching, isError, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
     usePayments(filters);
 
   const payments = data?.pages.flatMap((page) => page.data) ?? [];
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="Payments" description="Every payment intent your agents have submitted." />
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <PageHeader title="Payments" description="Every payment intent your agents have submitted." />
+        <RefreshButton onRefresh={() => refetch()} isRefreshing={isFetching} />
+      </div>
 
       <PaymentsFilters value={filterForm} onChange={setFilterForm} />
 

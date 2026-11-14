@@ -21,6 +21,7 @@ import { HashChainBadge } from "@/components/payments/hash-chain-badge";
 import { EventHistory } from "@/components/payments/event-history";
 import { AttemptsTable } from "@/components/payments/attempts-table";
 import { DecisionActions } from "@/components/consent/decision-actions";
+import { RefreshButton } from "@/components/shared/refresh-button";
 import { isApiError, problemMessage } from "@/lib/api/client";
 import { useSession } from "@/lib/auth/session";
 import { usePayment, useApproveEscalatedPayment, useRejectEscalatedPayment } from "@/lib/payments/queries";
@@ -35,7 +36,7 @@ function SummaryRow({ label, children }: { label: string; children: React.ReactN
 }
 
 export function PaymentDetailView({ paymentKey }: { paymentKey: string }) {
-  const { data: payment, isPending, isError, error, refetch } = usePayment(paymentKey);
+  const { data: payment, isPending, isFetching, isError, error, refetch } = usePayment(paymentKey);
   const session = useSession();
   const approve = useApproveEscalatedPayment();
   const reject = useRejectEscalatedPayment();
@@ -78,9 +79,12 @@ export function PaymentDetailView({ paymentKey }: { paymentKey: string }) {
             </h1>
             <PaymentStateBadge state={payment.state} />
           </div>
-          <Link href={`/payments/${payment.key}/replay`} className={buttonVariants({ variant: "outline", size: "sm" })}>
-            <History className="size-3.5" /> Replay
-          </Link>
+          <div className="flex items-center gap-2">
+            <RefreshButton onRefresh={() => refetch()} isRefreshing={isFetching} />
+            <Link href={`/payments/${payment.key}/replay`} className={buttonVariants({ variant: "outline", size: "sm" })}>
+              <History className="size-3.5" /> Replay
+            </Link>
+          </div>
         </div>
       </div>
 

@@ -21,6 +21,7 @@ import { PageHeader } from "@/components/page-header";
 import { CreateMerchantIntegrationDialog } from "@/components/merchants/create-merchant-integration-dialog";
 import { RevealSecretDialog } from "@/components/shared/reveal-secret-dialog";
 import { ConfirmButton } from "@/components/shared/confirm-button";
+import { RefreshButton } from "@/components/shared/refresh-button";
 import { problemMessage } from "@/lib/api/client";
 import { useSession } from "@/lib/auth/session";
 import {
@@ -33,7 +34,7 @@ import {
 } from "@/lib/commerce/merchant-integrations";
 
 export function MerchantsView() {
-  const { data, isPending, isError, error, refetch } = useMerchantIntegrations();
+  const { data, isPending, isFetching, isError, error, refetch } = useMerchantIntegrations();
   const session = useSession();
   const disable = useDisableMerchantIntegration();
   const enable = useEnableMerchantIntegration();
@@ -57,7 +58,10 @@ export function MerchantsView() {
           title="Merchant integrations"
           description="Merchants connected for commerce: a storefront's AI shopping agent proposing purchases its customers have authorized."
         />
-        <CreateMerchantIntegrationDialog disabled={!canGrant} />
+        <div className="flex items-center gap-2">
+          <RefreshButton onRefresh={() => refetch()} isRefreshing={isFetching} />
+          <CreateMerchantIntegrationDialog disabled={!canGrant} />
+        </div>
       </div>
 
       {isPending && <Skeleton className="h-64 w-full" />}
