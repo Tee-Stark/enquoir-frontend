@@ -110,6 +110,43 @@ export function ExecutionDetailView({ executionId }: { executionId: string }) {
           </Link>
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">History</CardTitle>
+          <CardDescription>Every report on this execution, in order - the reconciliation trail.</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col divide-y divide-border">
+          {execution.history.map((ev) => (
+            <div key={ev.sequence} className="flex items-start justify-between gap-4 py-2 text-sm">
+              <div>
+                <p className="text-foreground">{historyEventLabel(ev)}</p>
+                <p className="text-xs text-muted-foreground">{new Date(ev.at).toLocaleString()}</p>
+              </div>
+              {ev.detail && <p className="text-right text-xs text-muted-foreground">{ev.detail}</p>}
+            </div>
+          ))}
+        </CardContent>
+      </Card>
     </div>
   );
+}
+
+function historyEventLabel(ev: { kind: string; source: string | null; outcome: string | null }): string {
+  switch (ev.kind) {
+    case "redeemed":
+      return "Grant redeemed; execution created";
+    case "reported":
+      return `Reported ${ev.outcome ?? ""}${ev.source ? ` (${ev.source})` : ""}`.trim();
+    case "duplicate":
+      return "Duplicate report, ignored";
+    case "ignored":
+      return "Report ignored";
+    case "refused":
+      return "Report refused";
+    case "swept":
+      return "Swept: no outcome reported before the deadline";
+    default:
+      return ev.kind;
+  }
 }
