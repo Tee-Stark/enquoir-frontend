@@ -39,6 +39,14 @@ export function useCheckouts(filters: CheckoutFilters) {
   });
 }
 
+/** A small, one-shot page - for "recent activity" style lists, not the full paginated table. */
+export function useRecentCheckouts(limit = 5) {
+  return useQuery({
+    queryKey: ["checkouts", "recent", limit],
+    queryFn: () => unwrap(api.GET("/v1/checkouts", { params: { query: { limit } } })),
+  });
+}
+
 export function useCheckout(id: string) {
   return useQuery({
     queryKey: ["checkout", id],

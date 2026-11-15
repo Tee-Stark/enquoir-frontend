@@ -1613,7 +1613,7 @@ export interface paths {
          * List checkouts over a period, across every merchant integration
          * @description The dashboard's commerce activity view - every checkout the
          *     organisation's merchant integrations have submitted, newest first,
-         *     parallel to GET /v1/payments on the treasury side. Every filter is
+         *     parallel to GET /v1/attempts on the treasury side. Every filter is
          *     optional.
          */
         get: operations["listOrgCheckouts"];
@@ -1682,7 +1682,7 @@ export interface paths {
          * List executions over a period, across every merchant integration
          * @description The dashboard's commerce payments view - every execution the
          *     organisation's merchant integrations have redeemed, newest first,
-         *     parallel to GET /v1/attempts on the treasury side. Every filter is
+         *     parallel to GET /v1/payments on the treasury side. Every filter is
          *     optional.
          */
         get: operations["listOrgExecutions"];
@@ -1883,6 +1883,58 @@ export interface paths {
          *     names are in GET /v1/agents.
          */
         get: operations["analyticsTimeSeries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/commerce-analytics/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * An organisation's commerce activity over a period
+         * @description Checkouts are counted by when they were created; paid volume and
+         *     time to paid by when the execution finished. Across every merchant
+         *     integration the organisation owns. Default period, the last 30 days.
+         */
+        get: operations["commerceAnalyticsSummary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/commerce-analytics/timeseries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One commerce metric over time, for a chart
+         * @description Every bucket in the period is present for every group: zero for
+         *     counts and sums, null for time_to_paid where there is no data. At
+         *     most 1000 buckets per request.
+         *
+         *     | metric | value | group_by |
+         *     |---|---|---|
+         *     | checkouts | checkouts created | status, agent, currency, or none |
+         *     | paid_volume | minor units of executions that succeeded, by when they did | currency (always) |
+         *     | time_to_paid | median milliseconds from execution (redemption) to finished, succeeded only | none |
+         *
+         *     Grouping by agent gives agent IDs as the merchant named them.
+         */
+        get: operations["commerceAnalyticsTimeSeries"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2216,6 +2268,35 @@ export interface components {
                 by_outcome: components["schemas"]["CountsByKey"];
             };
             time_to_applied: {
+                count: number;
+                p50_ms: number | null;
+                p95_ms: number | null;
+            };
+        };
+        CommerceAnalyticsSummary: {
+            period: components["schemas"]["AnalyticsPeriod"];
+            checkouts: {
+                total: number;
+                /** @description Every status, zeros included. */
+                by_status: components["schemas"]["CountsByKey"];
+                /** @description authorized, awaiting_customer_approval or redeemed. */
+                in_progress: number;
+                /** @description Denied by the mandate's own evaluation - commerce's parallel to blocked_by_policy. */
+                denied: number;
+                /** @description paid / (paid + payment_failed), 0 to 1. denied is a decision, not a payment failure, so excluded. Null when nothing settled. */
+                success_rate: number | null;
+                /** @description Checkouts whose execution's outcome was unclear (unknown) that still resolved to paid or payment_failed. */
+                recovered_from_unknown: number;
+            };
+            /** @description Paid (succeeded execution) volume per currency. */
+            volume: {
+                currency: string;
+                paid_minor_units: number;
+                paid_amount: string;
+                paid_count: number;
+            }[];
+            active_agents: number;
+            time_to_paid: {
                 count: number;
                 p50_ms: number | null;
                 p95_ms: number | null;
@@ -6249,6 +6330,72 @@ export interface operations {
                 /** @description Bucket size. Weeks start on Monday. Default day. */
                 interval?: "hour" | "day" | "week" | "month";
                 group_by?: "state" | "agent" | "currency" | "outcome" | "operation";
+                /** @description Start of the period, inclusive (RFC 3339). */
+                from?: components["parameters"]["From"];
+                /** @description End of the period, exclusive (RFC 3339). */
+                to?: components["parameters"]["To"];
+                /** @description An IANA time zone, such as Africa/Lagos or America/New_York. Default UTC. */
+                tz?: components["parameters"]["TZ"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The series. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TimeSeries"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    commerceAnalyticsSummary: {
+        parameters: {
+            query?: {
+                /** @description Start of the period, inclusive (RFC 3339). */
+                from?: components["parameters"]["From"];
+                /** @description End of the period, exclusive (RFC 3339). */
+                to?: components["parameters"]["To"];
+                /** @description An IANA time zone, such as Africa/Lagos or America/New_York. Default UTC. */
+                tz?: components["parameters"]["TZ"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The summary. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommerceAnalyticsSummary"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    commerceAnalyticsTimeSeries: {
+        parameters: {
+            query: {
+                metric: "checkouts" | "paid_volume" | "time_to_paid";
+                /** @description Bucket size. Weeks start on Monday. Default day. */
+                interval?: "hour" | "day" | "week" | "month";
+                group_by?: "status" | "agent" | "currency";
                 /** @description Start of the period, inclusive (RFC 3339). */
                 from?: components["parameters"]["From"];
                 /** @description End of the period, exclusive (RFC 3339). */
