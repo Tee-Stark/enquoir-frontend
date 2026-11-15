@@ -22,11 +22,9 @@ const PAGE_SIZE = 25;
 /**
  * An organisation's executions across every merchant integration it
  * owns - the dashboard's commerce Payments view (Merchant mode),
- * parallel to usePayments on the treasury side. `enabled` lets the
- * Payments page's Treasury/Merchant toggle skip this fetch entirely
- * while showing the other mode.
+ * parallel to usePayments on the treasury side.
  */
-export function useExecutions(filters: ExecutionFilters, options?: { enabled?: boolean }) {
+export function useExecutions(filters: ExecutionFilters) {
   return useInfiniteQuery({
     queryKey: ["executions", filters],
     queryFn: ({ pageParam }: { pageParam?: string }) =>
@@ -37,7 +35,6 @@ export function useExecutions(filters: ExecutionFilters, options?: { enabled?: b
       ),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: nextCursorParam,
-    enabled: options?.enabled,
   });
 }
 

@@ -23,11 +23,9 @@ const PAGE_SIZE = 25;
 /**
  * An organisation's checkouts across every merchant integration it
  * owns - the dashboard's commerce Activity view (Merchant mode),
- * parallel to useAttempts on the treasury side. `enabled` lets the
- * Activity page's Treasury/Merchant toggle skip this fetch entirely
- * while showing the other mode.
+ * parallel to useAttempts on the treasury side.
  */
-export function useCheckouts(filters: CheckoutFilters, options?: { enabled?: boolean }) {
+export function useCheckouts(filters: CheckoutFilters) {
   return useInfiniteQuery({
     queryKey: ["checkouts", filters],
     queryFn: ({ pageParam }: { pageParam?: string }) =>
@@ -38,7 +36,6 @@ export function useCheckouts(filters: CheckoutFilters, options?: { enabled?: boo
       ),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: nextCursorParam,
-    enabled: options?.enabled,
   });
 }
 

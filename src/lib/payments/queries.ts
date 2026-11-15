@@ -20,12 +20,8 @@ export type PaymentFilters = {
 
 const PAGE_SIZE = 25;
 
-/**
- * Cursor-paginated; only fetched pages are kept in memory, not the
- * whole history. `enabled` lets a page with a Treasury/Merchant toggle
- * skip this fetch entirely while showing the other mode.
- */
-export function usePayments(filters: PaymentFilters, options?: { enabled?: boolean }) {
+/** Cursor-paginated; only fetched pages are kept in memory, not the whole history. */
+export function usePayments(filters: PaymentFilters) {
   return useInfiniteQuery({
     queryKey: ["payments", filters],
     queryFn: ({ pageParam }: { pageParam?: string }) =>
@@ -42,7 +38,6 @@ export function usePayments(filters: PaymentFilters, options?: { enabled?: boole
       ),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: nextCursorParam,
-    enabled: options?.enabled,
   });
 }
 
