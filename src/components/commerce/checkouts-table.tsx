@@ -29,9 +29,6 @@ export function CheckoutsTable({ checkouts }: { checkouts: Checkout[] }) {
         {checkouts.map((checkout) => (
           <TableRow key={checkout.id}>
             <TableCell>
-              {/* Every checkout, including a denied or canceled one, has a
-                  replay - mirrors treasury's payment replay never hiding
-                  itself for a short payment. */}
               <Link href={`/checkouts/${checkout.id}`} className="font-mono text-xs text-primary hover:underline">
                 {checkout.id}
               </Link>
