@@ -1,5 +1,7 @@
 # Enquoir Cloud — frontend
 
+**[Watch the demo video](https://drive.google.com/file/d/1o5EkxHbZDbUYuFS7bEKLKx4PJuskdm9J/view?usp=sharing)**
+
 The control and observability console for agentic financial operations. This
 is the frontend for [Enquoir](https://github.com/Tee-Stark/enquoir) (Go API,
 `enquoir`, sibling repo), built against its OpenAPI 3.1 contract.
