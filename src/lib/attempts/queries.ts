@@ -22,8 +22,12 @@ export type AttemptFilters = {
 
 const PAGE_SIZE = 25;
 
-/** Agent submissions and Airwallex rail calls, newest first - cursor-paginated. */
-export function useAttempts(filters: AttemptFilters) {
+/**
+ * Agent submissions and Airwallex rail calls, newest first -
+ * cursor-paginated. `enabled` lets a page with a Treasury/Merchant
+ * toggle skip this fetch entirely while showing the other mode.
+ */
+export function useAttempts(filters: AttemptFilters, options?: { enabled?: boolean }) {
   return useInfiniteQuery({
     queryKey: ["attempts", filters],
     queryFn: ({ pageParam }: { pageParam?: string }) =>
@@ -40,5 +44,6 @@ export function useAttempts(filters: AttemptFilters) {
       ),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: nextCursorParam,
+    enabled: options?.enabled,
   });
 }
