@@ -9,7 +9,7 @@ import { EmptyState } from "@/components/feedback/empty-state";
 import { ErrorState } from "@/components/feedback/error-state";
 import { PageHeader } from "@/components/page-header";
 import { RefreshButton } from "@/components/shared/refresh-button";
-import { ModeToggle, type ActivityMode } from "@/components/commerce/mode-toggle";
+import { ACTIVITY_MODES, ModeToggle, type ActivityMode } from "@/components/commerce/mode-toggle";
 import {
   EMPTY_FILTERS,
   PaymentsFilters,
@@ -123,7 +123,7 @@ function MerchantExecutions() {
 }
 
 export function PaymentsView() {
-  const [mode, setMode] = usePersistedMode<ActivityMode>("enquoir:payments-mode", ["treasury", "merchant"], "treasury");
+  const [mode, setMode] = usePersistedMode<ActivityMode>("enquoir:payments-mode", ACTIVITY_MODES, "treasury");
 
   return (
     <div className="flex flex-col gap-6">

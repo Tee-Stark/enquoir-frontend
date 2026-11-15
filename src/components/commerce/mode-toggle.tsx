@@ -4,6 +4,11 @@ import { cn } from "@/lib/utils";
 
 export type ActivityMode = "treasury" | "merchant";
 
+// A stable array reference for usePersistedMode's `valid` parameter -
+// passing a fresh `["treasury", "merchant"]` literal at the call site
+// would defeat its internal useCallback memoization every render.
+export const ACTIVITY_MODES = ["treasury", "merchant"] as const satisfies readonly ActivityMode[];
+
 /**
  * The Payments/Activity pages' Treasury<->Merchant switch - per page,
  * not a global setting, so a visitor can be looking at treasury

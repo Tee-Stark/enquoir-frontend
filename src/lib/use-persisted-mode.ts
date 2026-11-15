@@ -5,17 +5,30 @@ import { useCallback, useSyncExternalStore } from "react";
 type Listener = () => void;
 const listeners = new Map<string, Set<Listener>>();
 
+// When localStorage throws (blocked site data, private-mode quota, etc.)
+// setValue can't persist a change, but the toggle still needs to reflect
+// it for the rest of this page's life - otherwise a viewer with storage
+// blocked could never leave defaultValue no matter what they click.
+const memoryFallback = new Map<string, string>();
+
 function emit(key: string) {
   listeners.get(key)?.forEach((listener) => listener());
 }
 
-function readLocalStorage<T extends string>(key: string, valid: readonly T[], defaultValue: T): T {
+function readValue<T extends string>(key: string, valid: readonly T[], defaultValue: T): T {
   try {
     const stored = window.localStorage.getItem(key);
-    return stored !== null && (valid as readonly string[]).includes(stored) ? (stored as T) : defaultValue;
+    if (stored !== null && (valid as readonly string[]).includes(stored)) {
+      return stored as T;
+    }
   } catch {
-    return defaultValue;
+    // fall through to the in-memory fallback below
   }
+  const fallback = memoryFallback.get(key);
+  if (fallback !== undefined && (valid as readonly string[]).includes(fallback)) {
+    return fallback as T;
+  }
+  return defaultValue;
 }
 
 /**
@@ -36,17 +49,18 @@ export function usePersistedMode<T extends string>(key: string, valid: readonly 
     },
     [key]
   );
-  const getSnapshot = useCallback(() => readLocalStorage(key, valid, defaultValue), [key, valid, defaultValue]);
+  const getSnapshot = useCallback(() => readValue(key, valid, defaultValue), [key, valid, defaultValue]);
   const getServerSnapshot = useCallback(() => defaultValue, [defaultValue]);
 
   const value = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const setValue = useCallback(
     (next: T) => {
+      memoryFallback.set(key, next);
       try {
         window.localStorage.setItem(key, next);
       } catch {
-        // ignore - per-viewer convenience only
+        // ignore - memoryFallback above still makes this reload work
       }
       emit(key);
     },
