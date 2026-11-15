@@ -1602,6 +1602,118 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/checkouts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List checkouts over a period, across every merchant integration
+         * @description The dashboard's commerce activity view - every checkout the
+         *     organisation's merchant integrations have submitted, newest first,
+         *     parallel to GET /v1/payments on the treasury side. Every filter is
+         *     optional.
+         */
+        get: operations["listOrgCheckouts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/checkouts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One checkout, by an organisation member
+         * @description Read-only; any member of the organisation that owns it, regardless of which merchant integration it belongs to.
+         */
+        get: operations["getOrgCheckout"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/checkouts/{id}/replay": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One checkout's full lifecycle, as an ordered timeline
+         * @description Merges the checkout's own lifecycle (submission, decision,
+         *     cancellation, mandate-revocation, grant issuance, an unanswered or
+         *     unredeemed expiry) with its execution's report history, if it
+         *     redeemed one, into one timeline - offset and delta from the first
+         *     and previous step, ready to animate, the same shape as a payment's
+         *     replay. A checkout that was denied or never redeemed has no
+         *     execution and a short timeline; that is not an error.
+         */
+        get: operations["replayCheckout"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/executions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List executions over a period, across every merchant integration
+         * @description The dashboard's commerce payments view - every execution the
+         *     organisation's merchant integrations have redeemed, newest first,
+         *     parallel to GET /v1/attempts on the treasury side. Every filter is
+         *     optional.
+         */
+        get: operations["listOrgExecutions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/executions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One execution in full, by an organisation member
+         * @description The execution and its report history, regardless of which merchant integration it belongs to.
+         */
+        get: operations["getOrgExecution"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/payments": {
         parameters: {
             query?: never;
@@ -2626,6 +2738,59 @@ export interface components {
                 /** Format: date-time */
                 at: string;
             }[];
+        };
+        CheckoutReplayStep: {
+            index: number;
+            /** Format: date-time */
+            at: string;
+            /** @description Since the first step. */
+            offset_ms: number;
+            /** @description Since the previous step. */
+            delta_ms: number;
+            /** @enum {string} */
+            type: "submission" | "decision" | "grant" | "redemption" | "execution_report";
+            /**
+             * @description The merchant's own backend is the only machine caller for
+             *     checkout mutations - a checkout's named agent is never a
+             *     credentialed caller the way a treasury agent is, so it is
+             *     never an actor here, only ever named in a step's title.
+             * @enum {string}
+             */
+            actor: "merchant" | "enquoir" | "provider";
+            title: string;
+            decision: {
+                /** @enum {string} */
+                status: "authorized" | "denied" | "rejected" | "canceled" | "revoked" | "expired";
+                reasons: {
+                    code: string;
+                    detail: string;
+                }[];
+            } | null;
+            execution_event: {
+                sequence: number;
+                /** @enum {string} */
+                kind: "redeemed" | "reported" | "duplicate" | "ignored" | "refused" | "swept";
+                source: string | null;
+                outcome: string | null;
+                status_after: string;
+                provider_payment_reference: string | null;
+                provider_event_id: string | null;
+                amount_minor: number | null;
+                currency: string | null;
+                detail: string | null;
+                /** Format: date-time */
+                at: string;
+            } | null;
+        };
+        CheckoutReplay: {
+            checkout: components["schemas"]["Checkout"];
+            execution: components["schemas"]["Execution"] | null;
+            /** Format: date-time */
+            started_at: string | null;
+            /** Format: date-time */
+            ended_at: string | null;
+            duration_ms: number;
+            steps: components["schemas"]["CheckoutReplayStep"][];
         };
         ConsentView: {
             request_id: string;
@@ -5705,6 +5870,167 @@ export interface operations {
                 };
             };
             400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    listOrgCheckouts: {
+        parameters: {
+            query?: {
+                /** @description Start of the period, inclusive (RFC 3339). */
+                from?: components["parameters"]["From"];
+                /** @description End of the period, exclusive (RFC 3339). */
+                to?: components["parameters"]["To"];
+                mandate_id?: string;
+                customer_id?: string;
+                agent_id?: string;
+                /** @description The effective status (see Checkout). */
+                status?: string;
+                currency?: "USD" | "EUR" | "GBP";
+                /** @description Page size, 1 to 200. Default 50. */
+                limit?: components["parameters"]["Limit"];
+                /** @description The `next_cursor` of the previous page. */
+                cursor?: components["parameters"]["Cursor"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page of checkouts. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["Checkout"][];
+                        next_cursor: components["schemas"]["NextCursor"];
+                    };
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    getOrgCheckout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The checkout. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Checkout"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    replayCheckout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The checkout's replay. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckoutReplay"];
+                };
+            };
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    listOrgExecutions: {
+        parameters: {
+            query?: {
+                /** @description Start of the period, inclusive (RFC 3339). */
+                from?: components["parameters"]["From"];
+                /** @description End of the period, exclusive (RFC 3339). */
+                to?: components["parameters"]["To"];
+                /** @description `unknown` is the reconciliation queue. */
+                status?: "pending" | "succeeded" | "failed" | "unknown";
+                mandate_id?: string;
+                agent_id?: string;
+                currency?: "USD" | "EUR" | "GBP";
+                /** @description Page size, 1 to 200. Default 50. */
+                limit?: components["parameters"]["Limit"];
+                /** @description The `next_cursor` of the previous page. */
+                cursor?: components["parameters"]["Cursor"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page of executions. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["Execution"][];
+                        next_cursor: components["schemas"]["NextCursor"];
+                    };
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthenticated"];
+            403: components["responses"]["Forbidden"];
+            500: components["responses"]["InternalError"];
+        };
+    };
+    getOrgExecution: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The execution. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExecutionDetail"];
+                };
+            };
             401: components["responses"]["Unauthenticated"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
