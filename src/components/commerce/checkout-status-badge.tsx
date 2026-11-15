@@ -11,17 +11,17 @@ export type CheckoutStatus = components["schemas"]["Checkout"]["status"];
  * `revoked`, `payment_failed`). Classes written out in full - the
  * Tailwind compiler only generates classes it can see as literal strings.
  */
-export const CHECKOUT_STATUS_STYLE: Record<CheckoutStatus, { label: string; tintClassName: string }> = {
-  authorized: { label: "Authorized", tintClassName: "bg-primary/15 text-primary" },
-  awaiting_customer_approval: { label: "Awaiting approval", tintClassName: "bg-warning/15 text-warning" },
-  denied: { label: "Denied", tintClassName: "bg-accent/15 text-accent" },
-  rejected: { label: "Rejected", tintClassName: "bg-destructive/15 text-destructive" },
-  canceled: { label: "Canceled", tintClassName: "bg-neutral-state/15 text-neutral-state" },
-  expired: { label: "Expired", tintClassName: "bg-neutral-state/15 text-neutral-state" },
-  redeemed: { label: "Redeemed", tintClassName: "bg-primary/15 text-primary" },
-  revoked: { label: "Revoked", tintClassName: "bg-destructive/15 text-destructive" },
-  paid: { label: "Paid", tintClassName: "bg-success/15 text-success" },
-  payment_failed: { label: "Payment failed", tintClassName: "bg-destructive/15 text-destructive" },
+export const CHECKOUT_STATUS_STYLE: Record<CheckoutStatus, { label: string; tintClassName: string; dotClassName: string }> = {
+  authorized: { label: "Authorized", tintClassName: "bg-primary/15 text-primary", dotClassName: "bg-primary" },
+  awaiting_customer_approval: { label: "Awaiting approval", tintClassName: "bg-warning/15 text-warning", dotClassName: "bg-warning" },
+  denied: { label: "Denied", tintClassName: "bg-accent/15 text-accent", dotClassName: "bg-accent" },
+  rejected: { label: "Rejected", tintClassName: "bg-destructive/15 text-destructive", dotClassName: "bg-destructive" },
+  canceled: { label: "Canceled", tintClassName: "bg-neutral-state/15 text-neutral-state", dotClassName: "bg-neutral-state" },
+  expired: { label: "Expired", tintClassName: "bg-neutral-state/15 text-neutral-state", dotClassName: "bg-neutral-state" },
+  redeemed: { label: "Redeemed", tintClassName: "bg-primary/15 text-primary", dotClassName: "bg-primary" },
+  revoked: { label: "Revoked", tintClassName: "bg-destructive/15 text-destructive", dotClassName: "bg-destructive" },
+  paid: { label: "Paid", tintClassName: "bg-success/15 text-success", dotClassName: "bg-success" },
+  payment_failed: { label: "Payment failed", tintClassName: "bg-destructive/15 text-destructive", dotClassName: "bg-destructive" },
 };
 
 export function CheckoutStatusBadge({ status, className }: { status: CheckoutStatus; className?: string }) {
